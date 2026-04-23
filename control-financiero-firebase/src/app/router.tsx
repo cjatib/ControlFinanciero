@@ -4,10 +4,12 @@ import { AppLayout } from '@/layout/AppLayout';
 import { ProtectedRoute } from '@/layout/ProtectedRoute';
 import { PublicRoute } from '@/layout/PublicRoute';
 import { CategoriesPage } from '@/pages/CategoriesPage';
+import { CreditsPage } from '@/pages/CreditsPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { HistoryPage } from '@/pages/HistoryPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { RegisterPage } from '@/pages/RegisterPage';
+import { SavingsPage } from '@/pages/SavingsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { TransactionsPage } from '@/pages/TransactionsPage';
 
@@ -49,6 +51,14 @@ export const router = createHashRouter([
             element: <CategoriesPage />,
           },
           {
+            path: '/credits',
+            element: <CreditsPage />,
+          },
+          {
+            path: '/savings',
+            element: <SavingsPage />,
+          },
+          {
             path: '/transactions',
             element: <TransactionsPage />,
           },
@@ -69,4 +79,3 @@ export const router = createHashRouter([
     element: <Navigate to="/dashboard" replace />,
   },
 ]);
-

@@ -26,6 +26,30 @@ function HistoryIcon() {
   );
 }
 
+function CreditIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.8">
+      <path
+        d="M4 8.5A2.5 2.5 0 0 1 6.5 6h11A2.5 2.5 0 0 1 20 8.5v7A2.5 2.5 0 0 1 17.5 18h-11A2.5 2.5 0 0 1 4 15.5v-7Z"
+        strokeLinejoin="round"
+      />
+      <path d="M4 10.5h16M8 15h3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function SavingsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.8">
+      <path
+        d="M12 5c4.42 0 8 2.91 8 6.5 0 5.14-4.48 7.8-8 7.8S4 16.64 4 11.5C4 7.91 7.58 5 12 5Z"
+        strokeLinejoin="round"
+      />
+      <path d="M12 9.25v4.5M9.75 11.5h4.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function SettingsIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.8">
@@ -46,8 +70,18 @@ const NAV_ITEMS = [
     icon: CategoryIcon,
   },
   {
+    to: '/credits',
+    label: 'Credito',
+    icon: CreditIcon,
+  },
+  {
+    to: '/savings',
+    label: 'Ahorro',
+    icon: SavingsIcon,
+  },
+  {
     to: '/history',
-    label: 'Historico',
+    label: 'Historial',
     icon: HistoryIcon,
   },
   {
@@ -74,27 +108,27 @@ export function AppLayout() {
       <Link
         to="/transactions?create=1"
         className={cn(
-          'fixed bottom-[5.7rem] left-1/2 z-30 inline-flex h-16 w-16 -translate-x-1/2 items-center justify-center rounded-full bg-accent text-slate-950 shadow-[0_16px_34px_rgba(53,217,165,0.38)] transition hover:scale-[1.03] hover:bg-[#69e8be]',
+          'fixed bottom-[5.35rem] right-5 z-30 inline-flex h-11 w-11 items-center justify-center rounded-full bg-accent text-white shadow-[0_10px_20px_rgba(53,217,165,0.24)] transition hover:scale-[1.03] hover:bg-[#69e8be] sm:right-8',
           location.pathname === '/transactions' && 'ring-4 ring-accent/20',
         )}
         aria-label="Agregar transaccion"
       >
-        <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" stroke="currentColor" strokeWidth="2">
+        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2">
           <path d="M12 5v14M5 12h14" strokeLinecap="round" />
         </svg>
       </Link>
 
       <nav className="fixed inset-x-0 bottom-4 z-20 px-4 sm:px-6">
-        <div className="mx-auto grid max-w-md grid-cols-5 items-center rounded-[2rem] border border-white/10 bg-slate-950/80 px-3 py-3 shadow-glow backdrop-blur-xl sm:max-w-6xl">
-          {NAV_ITEMS.map((item, index) => {
+        <div className="mx-auto grid max-w-md grid-cols-6 items-center rounded-[1.8rem] border border-white/10 bg-slate-950/80 px-2 py-2 shadow-glow backdrop-blur-xl sm:max-w-6xl">
+          {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             return (
-              <div key={item.to} className={cn(index === 2 && 'col-start-4')}>
+              <div key={item.to}>
                 <NavLink
                   to={item.to}
                   className={({ isActive }) =>
                     cn(
-                      'flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-3 text-[10px] font-semibold tracking-[0.08em] text-slate-500 transition',
+                      'flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[9px] font-semibold tracking-[0.04em] text-slate-500 transition',
                       isActive && 'bg-white/6 text-ink',
                     )
                   }

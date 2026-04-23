@@ -40,3 +40,10 @@ export function validateAmount(value: number): string | null {
   return null;
 }
 
+export function validateInstallmentsCount(value: number): string | null {
+  if (!Number.isInteger(value) || value <= 0) {
+    return 'Ingresa una cantidad de cuotas mayor a cero.';
+  }
+
+  return null;
+}

@@ -1,6 +1,6 @@
 # ControlFinanciero
 
-PWA mobile-first construida con React, Vite, TypeScript estricto, Tailwind CSS y Firebase modular SDK. El MVP permite registro, login con email/password y Google, categorias por usuario, transacciones, historico filtrable, dashboard con saldo y despliegue como sitio estatico tradicional.
+PWA mobile-first construida con React, Vite, TypeScript estricto, Tailwind CSS y Firebase modular SDK. El MVP permite registro, login con email/password y Google, categorias por usuario, transacciones, historico filtrable, dashboard con saldo, modulo de creditos con cuotas y despliegue como sitio estatico tradicional.
 
 ## Stack
 
@@ -15,22 +15,22 @@ PWA mobile-first construida con React, Vite, TypeScript estricto, Tailwind CSS y
 
 ```text
 control-financiero-firebase/
-├─ public/
-├─ src/
-│  ├─ app/
-│  ├─ components/
-│  ├─ forms/
-│  ├─ layout/
-│  ├─ contexts/
-│  ├─ hooks/
-│  ├─ lib/
-│  ├─ pages/
-│  ├─ services/
-│  ├─ types/
-│  └─ utils/
-├─ .env.example
-├─ firestore.rules
-└─ README.md
+|-- public/
+|-- src/
+|   |-- app/
+|   |-- components/
+|   |-- forms/
+|   |-- layout/
+|   |-- contexts/
+|   |-- hooks/
+|   |-- lib/
+|   |-- pages/
+|   |-- services/
+|   |-- types/
+|   `-- utils/
+|-- .env.example
+|-- firestore.rules
+`-- README.md
 ```
 
 ## Instalacion
@@ -76,13 +76,13 @@ npm run build
 
 - Crea un proyecto en Firebase Console.
 - Activa una Web App dentro del proyecto.
-- Copia la configuracion y llénala en `.env`.
+- Copia la configuracion y llenala en `.env`.
 
 ### 2. Habilitar Authentication
 
 - Ve a `Authentication > Sign-in method`.
 - Activa `Email/Password`.
-- Si usarás Google login, activa tambien `Google`.
+- Si usaras Google login, activa tambien `Google`.
 
 ### 3. Authorized domains
 
@@ -95,9 +95,17 @@ npm run build
 - Crea la base en modo production o test segun tu proceso.
 - Publica las reglas iniciales de `firestore.rules`.
 
-### 5. Reglas de seguridad
+## Reglas de seguridad
 
-El proyecto ya incluye una base inicial con aislamiento por `uid`:
+El proyecto incluye una base inicial con aislamiento por `uid` para:
+
+- `users/{uid}`
+- `users/{uid}/categories/{categoryId}`
+- `users/{uid}/transactions/{transactionId}`
+- `users/{uid}/credits/{creditId}`
+- `users/{uid}/credits/{creditId}/installments/{installmentId}`
+- `users/{uid}/savingsPlans/{savingsPlanId}`
+- `users/{uid}/savingsPlans/{savingsPlanId}/entries/{entryId}`
 
 ```rules
 rules_version = '2';
@@ -121,6 +129,22 @@ service cloud.firestore {
 
       match /transactions/{transactionId} {
         allow create, read, update, delete: if isOwner(userId);
+      }
+
+      match /credits/{creditId} {
+        allow create, read, update, delete: if isOwner(userId);
+
+        match /installments/{installmentId} {
+          allow create, read, update, delete: if isOwner(userId);
+        }
+      }
+
+      match /savingsPlans/{savingsPlanId} {
+        allow create, read, update, delete: if isOwner(userId);
+
+        match /entries/{entryId} {
+          allow create, read, update, delete: if isOwner(userId);
+        }
       }
     }
   }
@@ -159,6 +183,64 @@ service cloud.firestore {
 - `createdAt: Timestamp`
 - `updatedAt: Timestamp`
 
+### `users/{uid}/credits/{creditId}`
+
+- `name: string`
+- `description?: string`
+- `totalAmount: number`
+- `totalInstallments: number`
+- `paidAmount: number`
+- `paidInstallments: number`
+- `firstDueDate: Timestamp`
+- `createdAt: Timestamp`
+- `updatedAt: Timestamp`
+
+### `users/{uid}/credits/{creditId}/installments/{installmentId}`
+
+- `amount: number`
+- `paymentDate: Timestamp`
+- `description?: string`
+- `createdAt: Timestamp`
+- `updatedAt: Timestamp`
+
+### `users/{uid}/savingsPlans/{savingsPlanId}`
+
+- `reason: string`
+- `monthlyTarget: number`
+- `savedAmount: number`
+- `entriesCount: number`
+- `createdAt: Timestamp`
+- `updatedAt: Timestamp`
+
+### `users/{uid}/savingsPlans/{savingsPlanId}/entries/{entryId}`
+
+- `amount: number`
+- `entryDate: Timestamp`
+- `description?: string`
+- `createdAt: Timestamp`
+- `updatedAt: Timestamp`
+
+## Que queda listo en este MVP
+
+- Registro con nombre, email y contrasena.
+- Login con email/password.
+- Login con Google.
+- Logout.
+- Persistencia de sesion mediante Firebase Auth.
+- Creacion automatica de `users/{uid}` al registrar o entrar con Google por primera vez.
+- CRUD de categorias.
+- CRUD de transacciones.
+- Dashboard con balance, ingresos, gastos y movimientos del mes.
+- Historico con filtros por tipo, categoria, mes y busqueda.
+- Modulo de creditos con CRUD completo.
+- Registro, edicion y eliminacion de cuotas por credito.
+- Calculo automatico de saldo pendiente, cuotas restantes y proximo vencimiento mensual.
+- Modulo de ahorro con varios planes por motivo.
+- Registro, edicion y eliminacion de ingresos de ahorro por plan.
+- Resumen por monto mensual, total ahorrado y avance del mes.
+- PWA instalable con manifest y service worker.
+- Build estatico listo para `dist/`.
+
 ## Despliegue en hosting estatico tradicional
 
 - Ejecuta `npm run build`.
@@ -167,31 +249,18 @@ service cloud.firestore {
 - El service worker y el manifest quedan incluidos dentro del build para instalacion PWA.
 - Si cambias de dominio o subdominio, recuerda agregarlo a Firebase Auth.
 
-## Que queda listo en este MVP
-
-- Registro con nombre, email y contraseña.
-- Login con email/password.
-- Login con Google.
-- Logout.
-- Persistencia de sesion mediante Firebase Auth.
-- Creacion automatica de `users/{uid}` al registrar o entrar con Google por primera vez.
-- CRUD de categorias.
-- CRUD de transacciones.
-- Dashboard con balance, ingresos, gastos y movimientos recientes.
-- Historico con filtros por tipo, categoria, fechas y busqueda.
-- PWA instalable con manifest y service worker.
-- Build estatico listo para `dist/`.
-
 ## Fase 2 sugerida
 
 - Firebase Functions para validacion centralizada y logica sensible.
 - Reglas de Firestore mas estrictas con validacion de esquema y ownership mas profundo.
-- Agregados precalculados para balances y reportes grandes.
-- Recuperacion de contraseña.
+- Agregados precalculados para balances, creditos y reportes grandes.
+- Recuperacion de contrasena.
 - Verificacion de email.
 - Soft delete y auditoria de cambios.
+- Integracion opcional entre cuotas de creditos y transacciones de gasto.
+- Alertas de vencimiento y recordatorios automaticos.
+- Metas totales de ahorro y alertas de cumplimiento mensual.
 
 ## Nota importante
 
 No se depende de backend Node.js, Prisma, MySQL ni Firebase Hosting. El proyecto esta pensado para funcionar como frontend estatico puro apoyado en Firebase Authentication y Firestore.
-

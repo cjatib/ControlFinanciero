@@ -67,6 +67,27 @@ export function DashboardPage() {
         </div>
       </Card>
 
+      <Card className="p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-bold text-ink">Herramientas</h2>
+            <p className="mt-1 text-sm text-slate-400">Accede rapido a creditos y planes de ahorro.</p>
+          </div>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <Link to="/credits">
+            <Button variant="secondary" fullWidth size="lg">
+              Ver creditos
+            </Button>
+          </Link>
+          <Link to="/savings">
+            <Button variant="secondary" fullWidth size="lg">
+              Ver ahorros
+            </Button>
+          </Link>
+        </div>
+      </Card>
+
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-xl font-bold text-ink">Movimientos del mes</h2>

@@ -10,17 +10,110 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    function optionalString(data, field) {
+      return !(field in data) || data[field] is string;
+    }
+
+    function validCategory(data) {
+      return data.name is string
+        && data.name.size() > 0
+        && data.type in ['income', 'expense']
+        && optionalString(data, 'color')
+        && optionalString(data, 'icon');
+    }
+
+    function validTransaction(data) {
+      return data.type in ['income', 'expense']
+        && data.amount is number
+        && data.amount > 0
+        && data.categoryId is string
+        && data.categoryId.size() > 0
+        && data.categoryName is string
+        && data.categoryName.size() > 0
+        && data.transactionDate is timestamp
+        && optionalString(data, 'description');
+    }
+
+    function validCredit(data) {
+      return data.name is string
+        && data.name.size() > 0
+        && data.totalAmount is number
+        && data.totalAmount > 0
+        && data.totalInstallments is number
+        && data.totalInstallments > 0
+        && data.paidAmount is number
+        && data.paidAmount >= 0
+        && data.paidAmount <= data.totalAmount
+        && data.paidInstallments is number
+        && data.paidInstallments >= 0
+        && data.paidInstallments <= data.totalInstallments
+        && data.firstDueDate is timestamp
+        && optionalString(data, 'description');
+    }
+
+    function validCreditInstallment(data) {
+      return data.amount is number
+        && data.amount > 0
+        && data.paymentDate is timestamp
+        && optionalString(data, 'description');
+    }
+
+    function validSavingsPlan(data) {
+      return data.reason is string
+        && data.reason.size() > 0
+        && data.monthlyTarget is number
+        && data.monthlyTarget > 0
+        && data.savedAmount is number
+        && data.savedAmount >= 0
+        && data.entriesCount is number
+        && data.entriesCount >= 0;
+    }
+
+    function validSavingsEntry(data) {
+      return data.amount is number
+        && data.amount > 0
+        && data.entryDate is timestamp
+        && optionalString(data, 'description');
+    }
+
     match /users/{userId} {
-      allow create, read, update, delete: if isOwner(userId);
+      allow read, write: if isOwner(userId);
 
       match /categories/{categoryId} {
-        allow create, read, update, delete: if isOwner(userId);
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validCategory(request.resource.data);
+        allow delete: if isOwner(userId);
       }
 
       match /transactions/{transactionId} {
-        allow create, read, update, delete: if isOwner(userId);
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validTransaction(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      match /credits/{creditId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validCredit(request.resource.data);
+        allow delete: if isOwner(userId);
+
+        match /installments/{installmentId} {
+          allow read: if isOwner(userId);
+          allow create, update: if isOwner(userId) && validCreditInstallment(request.resource.data);
+          allow delete: if isOwner(userId);
+        }
+      }
+
+      match /savingsPlans/{savingsPlanId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validSavingsPlan(request.resource.data);
+        allow delete: if isOwner(userId);
+
+        match /entries/{entryId} {
+          allow read: if isOwner(userId);
+          allow create, update: if isOwner(userId) && validSavingsEntry(request.resource.data);
+          allow delete: if isOwner(userId);
+        }
       }
     }
   }
 }
-
