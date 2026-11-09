@@ -8,6 +8,7 @@ import { CreditsPage } from '@/pages/CreditsPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { HistoryPage } from '@/pages/HistoryPage';
 import { LoginPage } from '@/pages/LoginPage';
+import { PlanPage } from '@/pages/PlanPage';
 import { RegisterPage } from '@/pages/RegisterPage';
 import { SavingsPage } from '@/pages/SavingsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
@@ -61,6 +62,10 @@ export const router = createHashRouter([
           {
             path: '/transactions',
             element: <TransactionsPage />,
+          },
+          {
+            path: '/plan',
+            element: <PlanPage />,
           },
           {
             path: '/history',
