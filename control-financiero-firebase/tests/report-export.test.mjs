@@ -22,6 +22,15 @@ test('produces Excel-friendly UTF-8 CSV with currency values and totals', () => 
   assert.ok(csv.includes('\r\n'));
 });
 
+test('keeps negative balances as numeric values in Excel', () => {
+  const csv = serializeHistoricalReportCsv([{
+    month: '2026-11', income: 15000, expenses: 24000,
+    savings: 0, balance: -9000, movementCount: 2, contributionCount: 0,
+  }], []);
+  assert.ok(csv.includes('"2026-11";"15000";"24000";"0";"-9000";"2";"0"'));
+  assert.ok(!csv.includes('"\'-9000"'));
+});
+
 test('quotes CSV injection prefixes in category names and doubles embedded quotation marks', () => {
   const csv = serializeHistoricalReportCsv(monthly, [
     { id: 'a', name: '=HYPERLINK("https://example.com")', total: 1, count: 1, percentageOfExpenses: 50 },
