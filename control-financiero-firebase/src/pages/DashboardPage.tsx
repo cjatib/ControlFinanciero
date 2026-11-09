@@ -9,6 +9,7 @@ import { useMonthlyBudgets } from '@/hooks/useMonthlyBudgets';
 import { useTransactions } from '@/hooks/useTransactions';
 import { formatCurrency } from '@/lib/format';
 import { calculateBudgetProgress } from '@/services/budget/budgetMath';
+import { resolveMonthlyBudget } from '@/services/budget/resolveMonthlyBudget';
 import { calculateSummary, filterTransactionsByMonth, getCurrentMonthValue } from '@/services/summary/summaryService';
 import type { BudgetGroup } from '@/types/budget';
 
@@ -61,7 +62,7 @@ export function DashboardPage() {
   const { transactions, loading: transactionsLoading, error: transactionsError } = useTransactions();
   const { budgets, loading: budgetLoading, error: budgetError } = useMonthlyBudgets();
   const [month, setMonth] = useState(getCurrentMonthValue());
-  const budget = budgets.find((item) => item.month === month);
+  const { budget, sourceMonth, inherited } = resolveMonthlyBudget(budgets, month);
   const groups: BudgetGroup[] = budget?.groups ?? [];
   const { totals: savingsTotals, error: savingsError } = useBudgetSavings(groups, month);
 
@@ -151,8 +152,15 @@ export function DashboardPage() {
                 <h2 className="text-lg font-extrabold">Distribución de mi sueldo</h2>
                 <p className="mt-1 text-xs text-slate-400">Base: {formatCurrency(budget.incomeAmount, currency)}</p>
               </div>
-              <Link to="/plan" className="rounded-xl bg-accent/15 px-3 py-2 text-xs font-bold text-accent">Editar</Link>
+              <Link to={'/plan?month=' + month} className="rounded-xl bg-accent/15 px-3 py-2 text-xs font-bold text-accent">
+                {inherited ? 'Personalizar' : 'Editar'}
+              </Link>
             </div>
+            {inherited ? (
+              <p className="rounded-xl border border-accent/20 bg-accent/10 px-3 py-2 text-xs text-accent">
+                Plan heredado de {sourceMonth}. Se mantiene activo hasta que configures una versión diferente para este mes.
+              </p>
+            ) : null}
             <div className="flex h-3 overflow-hidden rounded-full bg-white/10">
               {progress.map((item) => (
                 <div key={item.group.id} style={{
@@ -223,7 +231,7 @@ export function DashboardPage() {
             <Card className="space-y-2 p-4">
               <p className="text-sm font-bold text-amber-100">Gastos sin asignar a grupos</p>
               <p className="text-xl font-extrabold">{formatCurrency(unassignedExpenseAmount, currency)}</p>
-              <p className="text-xs text-slate-400">Estos gastos sí están incluidos en tu saldo, pero no en las barras de los grupos. <Link to="/plan" className="font-bold text-accent">Revisar categorías</Link></p>
+              <p className="text-xs text-slate-400">Estos gastos sí están incluidos en tu saldo, pero no en las barras de los grupos. <Link to={"/plan?month=" + month} className="font-bold text-accent">Revisar categorías</Link></p>
             </Card>
           ) : null}
           {savingAssigned > 0 ? (
