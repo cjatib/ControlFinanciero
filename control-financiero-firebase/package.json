@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "test:budget": "node --test tests/budget-inheritance.test.mjs",
     "test:analytics": "node --test tests/financial-analytics.test.mjs",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/budget-inheritance.test.mjs tests/financial-analytics.test.mjs"
   },
   "dependencies": {
     "firebase": "13.2.0",
