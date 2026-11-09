@@ -53,3 +53,20 @@ La rama y el PR permanecen separados de main. La publicación de reglas y el des
 ### Pruebas
 
 Ejecutar `npm test` y `npm run build` desde la carpeta `control-financiero-firebase`. Comprobar en móvil que las tarjetas se adaptan a la pantalla, el orden de las principales categorías es correcto y las alertas aparecen y desaparecen cuando se modifican transacciones. No es necesario publicar reglas nuevas.
+
+## Fase 4 — Reportes históricos (solo lectura)
+
+Ruta: **Más → Reportes** o el acceso «Ver reportes históricos» desde el dashboard. Esta sección no reemplaza Historial, que mantiene el detalle y la edición de movimientos.
+
+- Seleccionar un mes de cierre y un período de 6, 12 o 24 meses. Se incluyen todos los meses calendario del rango, incluso aquellos sin movimientos.
+- Gráfico comparativo de **ingresos y gastos** según la fecha de las transacciones.
+- Gráfico independiente de **aportes al ahorro**, por fecha de entrada en los planes que todavía existen. No usa el acumulado global savedAmount como ahorro del mes; no descuenta aportes del balance.
+- Resumen de ingresos, gastos, ahorro, balance de movimientos, promedios mensuales y cantidad de registros.
+- Cinco principales categorías de gasto del período y tabla de importes exactos por mes.
+- Gráficos desplazables horizontalmente en teléfonos, con montos exactos disponibles en la tabla.
+- Firestore se consulta con los permisos existentes para las subcolecciones de cada plan de ahorro; no usa collectionGroup ni necesita modificar reglas de seguridad.
+- No hay nuevas escrituras ni migraciones de datos.
+
+### Validaciones
+
+Ejecutar `npm test` y `npm run build`. Probar **Más → Reportes** en navegador e iPhone, cambiar 6/12/24 meses y comprobar el cambio de año de diciembre a enero. Revisar que los meses sin operaciones aparezcan con cero, que los aportes de ahorro coincidan con los planes actuales y que el balance sea ingresos menos gastos. Los aportes de planes eliminados previamente no son recuperables en este reporte.
