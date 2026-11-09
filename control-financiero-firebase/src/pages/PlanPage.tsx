@@ -41,6 +41,7 @@ export function PlanPage() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
+  const isHistorical = month < getCurrentMonthValue();
   const existing = budgets.find((item) => item.month === month);
   const resolved = resolveMonthlyBudget(budgets, month);
   const source = resolved.budget;
@@ -115,6 +116,10 @@ export function PlanPage() {
     setSaveError(null);
     setSaved(false);
     if (!user) return;
+    if (isHistorical) {
+      setSaveError('Este mes ya está cerrado. Los planes anteriores son de solo lectura.');
+      return;
+    }
     const issue = incompletePercentage ? 'Completa el porcentaje de cada grupo.' : validateMonthlyBudget(draft);
     if (issue) {
       setSaveError(issue);
@@ -140,7 +145,7 @@ export function PlanPage() {
       <PageHeader
         eyebrow="Plan financiero"
         title="Distribuye tu sueldo"
-        description="Define tu distribución una sola vez: los meses siguientes la heredan hasta que decidas cambiarla."
+        description="Los meses siguientes heredan tu plan, y los meses anteriores quedan cerrados para preservar su historial."
       />
       {budgetsError || categoriesError || savingsError ? (
         <Card className="space-y-2 p-4 text-sm text-rose-200">
@@ -158,13 +163,16 @@ export function PlanPage() {
           <input id="budget-month" type="month" value={month} onChange={(e) => setMonth(e.target.value)}
             className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-base text-ink" required />
           <p className="text-sm text-slate-400">{monthTitle(month)} · Los cambios solo afectarán al mes seleccionado.</p>
-          <label htmlFor="budget-income" className="block text-sm font-semibold text-slate-200">Sueldo base del mes (CLP)</label>
-          <input id="budget-income" type="number" inputMode="numeric" min={1} step={1}
-            placeholder="Ejemplo: 1000000" value={income} onChange={(e) => { setIncome(e.target.value); setSaved(false); }}
-            className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-xl font-bold text-ink placeholder:text-slate-500" required />
+          <fieldset disabled={isHistorical} className="space-y-3">
+            <label htmlFor="budget-income" className="block text-sm font-semibold text-slate-200">Sueldo base del mes (CLP)</label>
+            <input id="budget-income" type="number" inputMode="numeric" min={1} step={1}
+              placeholder="Ejemplo: 1000000" value={income} onChange={(e) => { setIncome(e.target.value); setSaved(false); }}
+              className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-xl font-bold text-ink placeholder:text-slate-500 disabled:opacity-60" required />
+          </fieldset>
           <p className="text-xs leading-5 text-slate-400">El sueldo base sirve para calcular tus límites. No crea un ingreso ni modifica las transacciones existentes.</p>
         </Card>
 
+        <fieldset disabled={isHistorical} className="min-w-0 space-y-5 disabled:opacity-80">
         <Card className="space-y-4 p-5">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-lg font-bold">Distribución</h2>
@@ -280,11 +288,12 @@ export function PlanPage() {
         {saveError || validation || incompletePercentage ? <p role="alert" className="rounded-xl bg-rose-300/10 p-3 text-sm text-rose-200">{saveError ?? (incompletePercentage ? 'Completa el porcentaje de cada grupo.' : validation)}</p> : null}
         {saved ? <p role="status" className="rounded-xl bg-emerald-300/10 p-3 text-sm text-emerald-200">Plan mensual guardado correctamente.</p> : null}
         <div className="space-y-2 rounded-2xl border border-white/10 bg-[#1d2027] p-3">
-          <Button type="submit" fullWidth size="lg" disabled={saving || !!validation || incompletePercentage || !!budgetsError}>
+          <Button type="submit" fullWidth size="lg" disabled={isHistorical || saving || !!validation || incompletePercentage || !!budgetsError}>
             {saving ? 'Guardando...' : existing ? 'Guardar cambios del mes' : resolved.inherited ? 'Personalizar plan de este mes' : 'Guardar plan mensual'}
           </Button>
           <Link to="/dashboard" className="block py-2 text-center text-sm text-slate-300">Volver al inicio</Link>
         </div>
+        </fieldset>
       </form>
     </div>
   );
