@@ -44,9 +44,9 @@ Si el acceso con Google arroja `auth/unauthorized-domain`, agregar el hostname E
 1. Entrar a la URL temporal HTTPS en Chrome y Safari; verificar sesión, carga del dashboard y lectura de los datos reales.
 2. En Safari, agregar la app desde ese dominio a la pantalla de inicio si deseas probar el modo instalado.
 3. Publicar una versión realmente diferente del frontend en el MISMO canal, por ejemplo un texto inofensivo en una pantalla. Recompilar y volver a ejecutar el comando anterior.
-4. Volver a abrir la PWA. Al reanudarse, comprobará actualizaciones; la comprobación está limitada a una por 30 minutos. Verificar la aparición del aviso «Hay una nueva versión disponible».
+4. Volver a abrir la PWA y entrar a **Más → Ajustes → Buscar actualizaciones**, que fuerza la comprobación de una versión nueva en ese momento. En segundo plano, la revisión automática también se limita a una vez cada 30 minutos. Verificar la aparición del aviso «Hay una nueva versión disponible».
 5. Pulsar «Más tarde» y confirmar que no se recarga.
-6. Cuando el aviso reaparezca, pulsar «Actualizar ahora» y confirmar que se recarga con la versión reciente.
+6. Si se pulsó «Más tarde», cerrar y volver a abrir la PWA para recuperar el aviso, o pulsar **Más → Ajustes → Buscar actualizaciones**. Seleccionar «Actualizar ahora» y confirmar que se recarga con la versión reciente.
 7. Revisar la navegación, formularios, categorías, presupuestos, reportes y exportación CSV/PDF.
 8. En Chrome DevTools → Application → Cache Storage, verificar que el service worker no guarda JSON con transacciones ni respuestas de Firestore. Pueden existir cachés locales independientes administradas por el SDK Firebase.
 
