@@ -45,7 +45,8 @@ export function TransactionForm({ categories, initialValue, onSubmit, onCancel, 
   // is recreated on each render, so it must not be an effect dependency:
   // otherwise resetting an already-empty selection causes a render loop.
   useEffect(() => {
-    if (!formState.categoryId) return;
+    // Categories may still be loading when an existing transaction is opened.
+    if (!formState.categoryId || categories.length === 0) return;
     const stillAvailable = categories.some(
       (category) => category.id === formState.categoryId && category.type === formState.type,
     );
