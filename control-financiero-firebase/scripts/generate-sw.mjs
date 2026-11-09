@@ -10,13 +10,15 @@ const swPath = path.join(dist, 'sw.js');
 
 const assetNames = (await readdir(assets)).sort();
 const indexHtml = await readFile(path.join(dist, 'index.html'), 'utf8');
-const digest = createHash('sha256')
-  .update(indexHtml)
-  .update('\0')
-  .update(assetNames.join('\n'))
-  .digest('hex')
-  .slice(0, 16);
 const template = await readFile(swPath, 'utf8');
+const hash = createHash('sha256').update(indexHtml).update('\0').update(assetNames.join('\n'));
+hash.update(template);
+for (const name of (await readdir(dist)).sort()) {
+  if (name === 'sw.js' || name === 'index.html' || name === 'assets') continue;
+  hash.update(name);
+  hash.update(await readFile(path.join(dist, name)));
+}
+const digest = hash.digest('hex').slice(0, 16);
 if (!template.includes("'__BUILD_ID__'")) {
   throw new Error('No se encontró el marcador de versión del service worker.');
 }
