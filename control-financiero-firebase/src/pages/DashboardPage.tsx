@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TransactionListItem } from '@/components/TransactionListItem';
+import { FinancialInsights } from '@/components/FinancialInsights';
 import { Card } from '@/components/ui/Card';
 import { Loader } from '@/components/ui/Loader';
 import { useAuth } from '@/hooks/useAuth';
@@ -9,6 +10,7 @@ import { useMonthlyBudgets } from '@/hooks/useMonthlyBudgets';
 import { useTransactions } from '@/hooks/useTransactions';
 import { formatCurrency } from '@/lib/format';
 import { calculateBudgetProgress } from '@/services/budget/budgetMath';
+import { previousMonth } from '@/services/analytics/financialAnalytics';
 import { resolveMonthlyBudget } from '@/services/budget/resolveMonthlyBudget';
 import { calculateSummary, filterTransactionsByMonth, getCurrentMonthValue } from '@/services/summary/summaryService';
 import type { BudgetGroup } from '@/types/budget';
@@ -71,6 +73,8 @@ export function DashboardPage() {
   }
 
   const monthTransactions = filterTransactionsByMonth(transactions, month);
+  const precedingMonth = previousMonth(month);
+  const precedingMonthTransactions = precedingMonth ? filterTransactionsByMonth(transactions, precedingMonth) : [];
   const summary = calculateSummary(monthTransactions);
   const currency = profile?.currency ?? 'CLP';
   const progress = budget ? calculateBudgetProgress(budget, monthTransactions, savingsTotals) : [];
@@ -247,6 +251,17 @@ export function DashboardPage() {
           ) : null}
         </>
       ) : <EmptyBudgetCard />}
+
+      <FinancialInsights
+        currency={currency}
+        month={month}
+        transactions={monthTransactions}
+        previousTransactions={precedingMonthTransactions}
+        previousMonth={precedingMonth}
+        progress={progress}
+        hasBudget={Boolean(budget)}
+        unassignedExpenses={budget ? unassignedExpenseAmount : 0}
+      />
 
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-2">
