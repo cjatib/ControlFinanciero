@@ -44,6 +44,18 @@ button {
   cursor: pointer;
 }
 
+/* Native select menus otherwise inherit light text on a white system popup. */
+select {
+  color-scheme: dark;
+}
+
+select option,
+select optgroup {
+  background-color: #222633;
+  color: #f1f5ff;
+}
+
+
 ::selection {
   background: rgba(53, 217, 165, 0.3);
   color: #ffffff;
