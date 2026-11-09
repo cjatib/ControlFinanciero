@@ -70,3 +70,18 @@ Ruta: **Más → Reportes** o el acceso «Ver reportes históricos» desde el da
 ### Validaciones
 
 Ejecutar `npm test` y `npm run build`. Probar **Más → Reportes** en navegador e iPhone, cambiar 6/12/24 meses y comprobar el cambio de año de diciembre a enero. Revisar que los meses sin operaciones aparezcan con cero, que los aportes de ahorro coincidan con los planes actuales y que el balance sea ingresos menos gastos. Los aportes de planes eliminados previamente no son recuperables en este reporte.
+
+## Fase 5 — Exportación de reportes y optimización móvil
+
+- **Más → Reportes → Descargar CSV (Excel)** descarga el período seleccionado con ingresos, gastos, aportes de ahorro, balance y cantidad de registros por mes, más totales y desglose por categorías. Usa CSV UTF-8 con BOM y delimitador `;` compatible con configuraciones regionales chilenas; importes numéricos sin separador de miles para facilitar cálculos.
+- El generador CSV sanea textos que podrían interpretarse como fórmulas de Excel; conserva los valores negativos de balance como números.
+- **Imprimir / Guardar PDF** utiliza la función de impresión nativa del navegador y una hoja de estilo A4 para visualizar el reporte. En escritorio seleccionar **Guardar como PDF** como destino. En Safari iPhone las opciones pueden variar; usar Compartir / Imprimir y la función de guardar PDF del sistema si está disponible.
+- La exportación se genera localmente dentro del navegador desde los datos ya cargados. No se envían movimientos financieros a otros servicios y no se crean archivos en Firebase.
+- Las exportaciones se deshabilitan cuando el reporte es inválido, está incompleto o falla la consulta a Firestore.
+- Carga diferida (lazy routes) de las pantallas secundarias para reducir el código necesario al entrar a Inicio; se eliminó la agrupación forzada de todas las dependencias Firebase en un único archivo. No se modificaron versiones de dependencias.
+
+### Validación
+
+Desde control-financiero-firebase ejecutar `npm test` y `npm run build`. En Chrome y Safari iPhone abrir Reportes, cambiar 6/12/24 meses, descargar CSV, confirmar caracteres con tilde y montos numéricos, probar saldos negativos y usar Imprimir / Guardar PDF. Después navegar entre Inicio, Movimientos, Plan, Ahorro y Más para verificar que la carga diferida no afecte rutas o formularios. Comparar el tamaño de los recursos iniciales en DevTools Network antes/después si se necesita cuantificar el rendimiento.
+
+El despliegue de reglas Firestore no es necesario: esta fase no introduce colecciones ni operaciones de escritura.
