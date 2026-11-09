@@ -59,7 +59,11 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  if (request.mode === 'navigate') {
+  // HashRouter navigates only at the app's scope root. Do not intercept or
+  // persist unrelated HTML routes that might contain user-specific data.
+  const shellNavigation = url.pathname === new URL(HOME).pathname
+    || url.pathname === new URL(INDEX).pathname;
+  if (request.mode === 'navigate' && shellNavigation) {
     // Always try network first for current HTML; offline returns only a
     // cached app shell, not a promise of offline Firestore persistence.
     event.respondWith((async () => {
