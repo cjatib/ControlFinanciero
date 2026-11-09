@@ -26,9 +26,11 @@ export function serializeHistoricalReportCsv(
     throw new Error('Selecciona un período válido para exportar el reporte.');
   }
   const summary = summarizeHistoricalReport(rows);
+  const first = rows[0]!;
+  const last = rows[rows.length - 1]!;
   const lines = [
     csvLine(['ControlFinanciero - Reporte histórico']),
-    csvLine(['Desde', rows[0].month, 'Hasta', rows[rows.length - 1].month]),
+    csvLine(['Desde', first.month, 'Hasta', last.month]),
     csvLine(['Moneda', 'CLP']),
     '',
     csvLine(['Mes', 'Ingresos CLP', 'Gastos CLP', 'Aportes al ahorro CLP', 'Balance de movimientos CLP', 'N° movimientos', 'N° aportes']),
