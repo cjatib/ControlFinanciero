@@ -30,6 +30,8 @@ jobs:
         run: npm run build
       - name: Validate release-specific service worker
         run: npm run test:pwa-build
+      - name: Validate release candidate configuration
+        run: node scripts/release-preflight.mjs --ci
       - name: Configure Java for Firestore emulator
         uses: actions/setup-java@v4
         with:
