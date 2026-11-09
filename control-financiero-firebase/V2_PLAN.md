@@ -4,13 +4,13 @@
 
 Esta fase agrega solo la colección `users/{uid}/monthlyBudgets/{YYYY-MM}`. No modifica ni elimina transacciones, categorías, créditos ni ahorros existentes.
 Cada documento contiene `month`, `incomeAmount`, `groups`, `createdAt` y `updatedAt`. El sueldo base configura límites, no crea un ingreso.
-Cada mes se guarda por separado. Si el mes no tiene plan propio, se muestra automáticamente el último plan guardado de un mes anterior (solo lectura; no se crea un documento). Si no existe ninguno, aparece una propuesta editable 50/30/20. Al modificar y guardar, se crea un documento exclusivo para el mes seleccionado sin modificar otros documentos mensuales. Los meses heredados que aún no tienen un documento propio reflejan la última versión del plan anterior hasta que se personalicen.
+Cada mes se guarda por separado. Si el mes no tiene plan propio, se muestra automáticamente el último plan guardado de un mes anterior (solo lectura; no se crea un documento). Si no existe ninguno, aparece una propuesta editable 50/30/20. Al modificar y guardar, se crea un documento exclusivo para el mes seleccionado sin modificar otros documentos mensuales. Los meses anteriores se muestran en modo consulta y la aplicación impide guardarlos o cambiarlos retroactivamente. Por ejemplo, en enero una nueva versión del plan afecta enero y los meses futuros que la hereden, pero diciembre conserva el plan que estuvo vigente. Solo los meses actuales o futuros pueden personalizarse; la seguridad de esta restricción depende del cliente (las reglas actuales siguen permitiendo escrituras del dueño autenticado).
 Se permiten entre 1 y 100 grupos. Los porcentajes deben sumar exactamente 100%; una categoría de gasto no puede pertenecer a dos grupos, ni un plan de ahorro vincularse a dos grupos el mismo mes.
 Los gastos se calculan desde las transacciones existentes; los ahorros reales, desde las entradas de los planes. Los aportes de ahorro NO se descuentan otra vez del saldo de movimientos.
 
 ## Prueba local
 
-Desde la rama `feature/control-financiero-v2` y la carpeta `control-financiero-firebase`, con Node >=24.12.0, ejecutar `npm ci`, `npm run build` y `npm run dev -- --host 0.0.0.0`.
+Desde la rama `feature/control-financiero-v2` y la carpeta `control-financiero-firebase`, con Node >=24.12.0, ejecutar `npm ci`, `npm run test:budget`, `npm run build` y `npm run dev -- --host 0.0.0.0`.
 
 ## Publicación de reglas de Firestore — acción manual aparte
 
@@ -33,9 +33,9 @@ El archivo firebase.json apunta solamente a firestore.rules; no se despliega Hos
 3. En Inicio, comprobar los montos de ingresos, gastos, saldo de movimientos y presupuesto mensual.
 4. Registrar, editar y eliminar un gasto de prueba vinculado a un grupo y verificar el progreso.
 5. Crear un aporte de prueba a un plan vinculado y comprobar que incrementa la meta de ahorro sin descontarlo dos veces del saldo.
-6. Seleccionar diciembre tras guardar noviembre y comprobar que el plan de noviembre se aplica automáticamente sin tener que crearlo de nuevo. Después cambiar diciembre y guardar, y comprobar que noviembre conserva sus porcentajes.
+6. Seleccionar diciembre tras guardar noviembre y comprobar que el plan de noviembre se aplica automáticamente sin tener que crearlo de nuevo. En diciembre, al cambiar y guardar, noviembre conserva sus porcentajes. Al llegar enero, crear otro plan: diciembre debe continuar con sus propios valores y quedar solo de lectura.
 7. Intentar guardar un porcentaje total distinto de 100 y un plan de ahorro duplicado; se debe impedir.
-8. Verificar comportamiento en Safari para iPhone, navegación y teclado.
+8. Verificar comportamiento en Safari para iPhone, navegación y teclado. En Movimientos, seleccionar una categoría en el modal y confirmar que permanece seleccionada y que no aparece `Maximum update depth exceeded` en la consola.
 
 ## Pendientes antes de fusionar
 
