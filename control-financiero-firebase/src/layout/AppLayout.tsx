@@ -76,6 +76,14 @@ function TransactionsIcon() {
   );
 }
 
+function ReportsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M4 19V5M4 19h16M8 15v-5M13 15V7M18 15v-8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function MoreIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -93,6 +101,7 @@ const MAIN_NAV_ITEMS = [
 
 const SECONDARY_NAV_ITEMS = [
   { to: '/history', label: 'Historial', icon: HistoryIcon },
+  { to: '/reports', label: 'Reportes', icon: ReportsIcon },
   { to: '/categories', label: 'Categorías', icon: CategoryIcon },
   { to: '/credits', label: 'Créditos', icon: CreditIcon },
   { to: '/settings', label: 'Ajustes', icon: SettingsIcon },
