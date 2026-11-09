@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { downloadReportCsv, reportCsvFilename, serializeHistoricalReportCsv } from '@/services/reports/exportReport';
 import { Link } from 'react-router-dom';
 import { MonthlyChart } from '@/components/reports/MonthlyChart';
 import { Card } from '@/components/ui/Card';
@@ -43,6 +44,7 @@ export function ReportsPage() {
   const { entries, loading: savingsLoading, error: savingsError } = useHistoricalSavingsEntries(plans);
   const [endMonth, setEndMonth] = useState(getCurrentMonthValue());
   const [period, setPeriod] = useState<Period>(12);
+  const [exportError, setExportError] = useState<string | null>(null);
   const currency = profile?.currency ?? 'CLP';
 
   const rows = useMemo(
@@ -68,15 +70,33 @@ export function ReportsPage() {
   const periodEnd = rows[rows.length - 1]?.month ?? '';
   const topCategory = categoryTotals[0];
 
+  function handleExportCsv() {
+    try {
+      downloadReportCsv(
+        serializeHistoricalReportCsv(rows, categoryTotals),
+        reportCsvFilename(endMonth, period),
+      );
+      setExportError(null);
+    } catch (failure) {
+      setExportError(failure instanceof Error ? failure.message : 'No se pudo generar el archivo CSV.');
+    }
+  }
+
   return (
-    <div className="space-y-5">
+    <div className="report-print-area space-y-5">
       <PageHeader
         eyebrow="Reportes históricos"
         title="La evolución de tu dinero"
         description="Analiza tus ingresos, gastos y aportes de ahorro a través del tiempo, sin modificar tus registros."
       />
 
-      <Card className="space-y-4 p-4 sm:p-5">
+      <div className="print-only">
+        <h2>Reporte financiero histórico</h2>
+        <p>Período: {period} meses · hasta {endMonth}</p>
+        <p>Moneda: CLP · Los aportes de ahorro se muestran separadamente del balance.</p>
+      </div>
+
+      <Card className="report-filters space-y-4 p-4 sm:p-5">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div className="space-y-2">
             <label htmlFor="report-end-month" className="block text-sm font-semibold text-slate-200">Hasta qué mes</label>
@@ -103,6 +123,20 @@ export function ReportsPage() {
           </p>
         ) : <p className="text-xs text-rose-200">Selecciona un mes válido para generar el reporte.</p>}
       </Card>
+
+      {!error && rows.length > 0 ? (
+        <div className="print-hidden flex flex-wrap gap-3" role="group" aria-label="Exportar reportes">
+          <button type="button" onClick={handleExportCsv}
+            className="inline-flex min-h-12 flex-1 items-center justify-center rounded-2xl bg-accent px-4 text-sm font-extrabold text-slate-950 sm:flex-none">
+            Descargar CSV (Excel)
+          </button>
+          <button type="button" onClick={() => window.print()}
+            className="inline-flex min-h-12 flex-1 items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-4 text-sm font-semibold text-slate-100 sm:flex-none">
+            Imprimir / Guardar PDF
+          </button>
+        </div>
+      ) : null}
+      {exportError ? <p role="alert" className="print-hidden rounded-xl bg-rose-300/10 p-3 text-sm text-rose-200">{exportError}</p> : null}
 
       {error ? (
         <Card className="space-y-2 p-5" role="alert">
