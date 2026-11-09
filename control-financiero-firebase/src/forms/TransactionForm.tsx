@@ -14,6 +14,9 @@ interface TransactionFormProps {
   initialValue?: Transaction | null;
   onSubmit: (payload: TransactionPayload) => Promise<void>;
   onCancel: () => void;
+  formId?: string;
+  hideActions?: boolean;
+  onSubmittingChange?: (value: boolean) => void;
 }
 
 interface TransactionState {
@@ -24,7 +27,7 @@ interface TransactionState {
   transactionDate: string;
 }
 
-export function TransactionForm({ categories, initialValue, onSubmit, onCancel }: TransactionFormProps) {
+export function TransactionForm({ categories, initialValue, onSubmit, onCancel, formId, hideActions = false, onSubmittingChange }: TransactionFormProps) {
   const [formState, setFormState] = useState<TransactionState>({
     type: initialValue?.type ?? 'expense',
     amount: initialValue ? `${initialValue.amount}` : '',
@@ -44,7 +47,7 @@ export function TransactionForm({ categories, initialValue, onSubmit, onCancel }
     if (!selectedCategory) {
       setFormState((current) => ({
         ...current,
-        categoryId: filteredCategories[0]?.id ?? '',
+        categoryId: '',
       }));
     }
   }, [filteredCategories, formState.categoryId]);
@@ -72,6 +75,7 @@ export function TransactionForm({ categories, initialValue, onSubmit, onCancel }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitting) return;
     setSubmitError(null);
 
     if (!validate()) {
@@ -87,6 +91,7 @@ export function TransactionForm({ categories, initialValue, onSubmit, onCancel }
 
     try {
       setSubmitting(true);
+      onSubmittingChange?.(true);
       await onSubmit({
         type: formState.type,
         amount: Number(formState.amount),
@@ -99,25 +104,22 @@ export function TransactionForm({ categories, initialValue, onSubmit, onCancel }
       setSubmitError(getFirebaseErrorMessage(error));
     } finally {
       setSubmitting(false);
+      onSubmittingChange?.(false);
     }
   }
 
   return (
-    <form className="space-y-5" onSubmit={handleSubmit}>
-      <Select
-        id="transaction-type"
-        label="Tipo"
-        value={formState.type}
-        onChange={(event) =>
-          setFormState((current) => ({
-            ...current,
-            type: event.target.value as TransactionPayload['type'],
-          }))
-        }
-      >
-        <option value="expense">Gasto</option>
-        <option value="income">Ingreso</option>
-      </Select>
+    <form id={formId} className="space-y-5" onSubmit={handleSubmit}>
+      <div className="grid grid-cols-2 gap-2" role="group" aria-label="Tipo de movimiento">
+        {(['expense', 'income'] as const).map((type) => (
+          <button key={type} type="button" aria-pressed={formState.type === type}
+            onClick={() => setFormState((current) => ({ ...current, type, categoryId: '' }))}
+            className={'h-12 rounded-2xl border text-sm font-semibold transition ' +
+              (formState.type === type ? 'border-accent bg-accent text-slate-950' : 'border-white/10 bg-white/5 text-slate-200')}>
+            {type === 'expense' ? 'Gasto' : 'Ingreso'}
+          </button>
+        ))}
+      </div>
 
       <Input
         id="transaction-amount"
@@ -173,14 +175,14 @@ export function TransactionForm({ categories, initialValue, onSubmit, onCancel }
         </p>
       ) : null}
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-        <Button variant="ghost" fullWidth size="lg" type="button" onClick={onCancel}>
-          Cancelar
-        </Button>
-        <Button fullWidth size="lg" type="submit" disabled={submitting || filteredCategories.length === 0}>
-          {submitting ? 'Guardando...' : initialValue ? 'Actualizar transaccion' : 'Crear transaccion'}
-        </Button>
-      </div>
+      {!hideActions ? (
+        <div className="flex flex-col gap-2">
+          <Button fullWidth size="lg" type="submit" disabled={submitting || filteredCategories.length === 0}>
+            {submitting ? 'Guardando...' : initialValue ? 'Guardar cambios' : 'Guardar movimiento'}
+          </Button>
+          <Button variant="ghost" fullWidth size="lg" type="button" onClick={onCancel}>Cancelar</Button>
+        </div>
+      ) : null}
     </form>
   );
 }
