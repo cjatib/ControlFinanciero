@@ -9,9 +9,10 @@
     "preview": "vite preview",
     "test:budget": "node --test tests/budget-inheritance.test.mjs",
     "test:analytics": "node --test tests/financial-analytics.test.mjs",
-    "test": "node --test tests/budget-inheritance.test.mjs tests/financial-analytics.test.mjs tests/historical-report.test.mjs tests/report-export.test.mjs",
+    "test": "node --test tests/budget-inheritance.test.mjs tests/financial-analytics.test.mjs tests/historical-report.test.mjs tests/report-export.test.mjs tests/report-pdf.test.mjs",
     "test:reports": "node --test tests/historical-report.test.mjs",
-    "test:export": "node --test tests/report-export.test.mjs"
+    "test:export": "node --test tests/report-export.test.mjs",
+    "test:pdf": "node --test tests/report-pdf.test.mjs"
   },
   "dependencies": {
     "firebase": "13.2.0",
