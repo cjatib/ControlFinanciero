@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { PwaUpdateCheck } from '@/components/PwaUpdateCheck';
 import { useAuth } from '@/hooks/useAuth';
 
 export function SettingsPage() {
@@ -36,6 +37,10 @@ export function SettingsPage() {
             </dd>
           </div>
         </dl>
+      </Card>
+
+      <Card className="p-5">
+        <PwaUpdateCheck />
       </Card>
 
       <Button variant="danger" fullWidth size="lg" onClick={() => void logout()}>
