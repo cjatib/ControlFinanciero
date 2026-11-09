@@ -70,3 +70,55 @@ No usar `npm audit fix --force`: propone degradar Firebase. Para una actualizaci
 ## 7. Condiciones antes de publicar live
 
 Validar Safari iPhone HTTPS, persistencia de sesión, actualización sin interrumpir trabajo, navegación, reglas y dependencias. Conservar procedimiento de reversión. **No fusionar main ni desplegar live hasta completar estas validaciones.**
+
+## 8. Fase 8 — Seguridad aplicada y procedimiento de reversión
+
+Se actualizó **Vite 6.4.5**, su `esbuild` a 0.25.12 y la dependencia transitiva `@grpc/grpc-js` a 1.14.7 mediante override; Firebase se mantiene en 13.2.0. El primer `npm audit` completo de CI reportó **0 vulnerabilidades**. El CI ahora exige auditoría y pruebas. Detalle: `V2_SECURITY.md`.
+
+### Nueva prueba en el canal HTTPS, sin modificar el sitio live
+
+Desde la rama V2 y con Node >=24.12.0:
+```bash
+npm ci
+npm audit --audit-level=moderate
+npm test
+npm run build
+npm run test:pwa-build
+npx firebase-tools hosting:channel:deploy v2-pruebas --project control-financiero-49b07 --expires 7d
+```
+
+**Tras actualizar Vite y dependencias, repetir pruebas manuales del canal HTTPS** en Chrome y iPhone: sesión Google/correo, movimientos, categorías, plan, ahorro, créditos, dashboard, reportes, CSV/PDF y aviso de nueva versión. Este canal comparte los datos PRD.
+
+### Condición previa a una futura publicación live (solo cuando se autorice)
+
+Verificar que la vista previa es correcta y que Hosting live tiene una versión de respaldo. Si hay una versión live previa, conservarla temporalmente en otro canal:
+```bash
+npx firebase-tools hosting:clone \
+  control-financiero-49b07:live \
+  control-financiero-49b07:pre-v2 \
+  --project control-financiero-49b07
+```
+
+Revisar en Firebase Console → Hosting → historial que el clon contiene la versión estable anterior. Si el canal live no tenía versión previa, no existe tal respaldo de Hosting y no corresponde ejecutar ese clon.
+
+**Solo con aprobación expresa**, publicar exactamente la versión ya probada en `v2-pruebas`:
+```bash
+npx firebase-tools hosting:clone \
+  control-financiero-49b07:v2-pruebas \
+  control-financiero-49b07:live \
+  --project control-financiero-49b07
+```
+
+Clonar un canal de Hosting **no altera reglas Firestore ni documentos**. El sitio live usaría el frontend publicado desde la vista previa.
+
+### Reversión de Hosting si el frontend falla
+
+Usar Firebase Console → Hosting → Historial de versiones → menú de una versión estable anterior → **Roll back**. Como alternativa, si existe el canal `pre-v2` con la versión estable:
+```bash
+npx firebase-tools hosting:clone \
+  control-financiero-49b07:pre-v2 \
+  control-financiero-49b07:live \
+  --project control-financiero-49b07
+```
+
+Este rollback afecta únicamente archivos y configuración de Hosting: **no recupera movimientos ni restaura reglas de Firestore**. No borrar el canal `pre-v2` antes de cerrar el período de estabilización. Documentación oficial: https://firebase.google.com/docs/hosting/manage-hosting-resources .
