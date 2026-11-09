@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Loader } from '@/components/ui/Loader';
@@ -11,6 +11,7 @@ import { useSavingsPlans } from '@/hooks/useSavingsPlans';
 import { formatCurrency } from '@/lib/format';
 import { saveMonthlyBudget } from '@/services/budget/budgetService';
 import { validateMonthlyBudget } from '@/services/budget/budgetMath';
+import { resolveMonthlyBudget } from '@/services/budget/resolveMonthlyBudget';
 import { getCurrentMonthValue } from '@/services/summary/summaryService';
 import { BUDGET_COLORS, newBudgetGroup, starterBudgetGroups } from '@/types/budget';
 import type { BudgetGroup, BudgetGroupKind, MonthlyBudgetPayload } from '@/types/budget';
@@ -25,32 +26,43 @@ function monthTitle(month: string) {
 
 export function PlanPage() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const { budgets, loading: budgetsLoading, error: budgetsError } = useMonthlyBudgets();
   const { categories, loading: categoriesLoading, error: categoriesError } = useCategories();
   const { plans, loading: savingsLoading, error: savingsError } = useSavingsPlans();
-  const [month, setMonth] = useState(getCurrentMonthValue());
+  const [month, setMonth] = useState(() => {
+    const requested = searchParams.get('month');
+    return requested && /^\d{4}-(0[1-9]|1[0-2])$/.test(requested) ? requested : getCurrentMonthValue();
+  });
   const [income, setIncome] = useState('');
   const [groups, setGroups] = useState<BudgetGroup[]>(starterBudgetGroups);
+  const [percentageInputs, setPercentageInputs] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
   const existing = budgets.find((item) => item.month === month);
+  const resolved = resolveMonthlyBudget(budgets, month);
+  const source = resolved.budget;
+
   useEffect(() => {
-    setIncome(existing ? String(existing.incomeAmount) : '');
-    setGroups(existing ? existing.groups.map((g) => ({
-      ...g,
-      categoryIds: [...g.categoryIds],
-    })) : starterBudgetGroups());
+    const nextGroups = source
+      ? source.groups.map((g) => ({ ...g, categoryIds: [...g.categoryIds] }))
+      : starterBudgetGroups();
+    setIncome(source ? String(source.incomeAmount) : '');
+    setGroups(nextGroups);
+    setPercentageInputs(Object.fromEntries(nextGroups.map((g) => [g.id, String(g.percentage)])));
     setSaved(false);
     setSaveError(null);
-  }, [month, existing]);
+  }, [month, source]);
+
 
   const total = groups.reduce((sum, group) => sum + Number(group.percentage || 0), 0);
   const amount = Number(income);
   const assignedTotal = Number.isFinite(amount) ? amount : 0;
   const draft: MonthlyBudgetPayload = { month, incomeAmount: amount, groups };
   const validation = validateMonthlyBudget(draft);
+  const incompletePercentage = groups.some((g) => !percentageInputs[g.id]?.trim());
   const usedExpenseCategoryIds = useMemo(
     () => new Set(groups.filter((g) => g.kind === 'expense').flatMap((g) => g.categoryIds)),
     [groups],
@@ -60,6 +72,21 @@ export function PlanPage() {
   function patchGroup(id: string, patch: Partial<BudgetGroup>) {
     setGroups((current) => current.map((group) => group.id === id ? { ...group, ...patch } : group));
     setSaved(false);
+  }
+
+  function changePercentage(groupId: string, raw: string) {
+    const value = raw.replace(',', '.');
+    if (value !== '' && !/^\d*(?:\.\d{0,2})?$/.test(value)) return;
+    setPercentageInputs((current) => ({ ...current, [groupId]: value }));
+    patchGroup(groupId, { percentage: value === '' ? 0 : Number(value) });
+  }
+
+  function normalizePercentage(groupId: string) {
+    setPercentageInputs((current) => {
+      const raw = current[groupId] ?? '';
+      if (raw.trim() === '') return current;
+      return { ...current, [groupId]: String(Number(raw)) };
+    });
   }
 
   function changeKind(id: string, kind: BudgetGroupKind) {
@@ -88,7 +115,7 @@ export function PlanPage() {
     setSaveError(null);
     setSaved(false);
     if (!user) return;
-    const issue = validateMonthlyBudget(draft);
+    const issue = incompletePercentage ? 'Completa el porcentaje de cada grupo.' : validateMonthlyBudget(draft);
     if (issue) {
       setSaveError(issue);
       return;
@@ -113,7 +140,7 @@ export function PlanPage() {
       <PageHeader
         eyebrow="Plan financiero"
         title="Distribuye tu sueldo"
-        description="Crea tantos grupos como necesites. Cada mes conserva su propia distribución."
+        description="Define tu distribución una sola vez: los meses siguientes la heredan hasta que decidas cambiarla."
       />
       {budgetsError || categoriesError || savingsError ? (
         <Card className="space-y-2 p-4 text-sm text-rose-200">
@@ -126,7 +153,7 @@ export function PlanPage() {
         <Card className="space-y-4 p-5">
           <div className="flex items-center justify-between gap-3">
             <label htmlFor="budget-month" className="text-sm font-semibold text-slate-200">Mes de planificación</label>
-            {existing ? <span className="rounded-full bg-emerald-300/15 px-3 py-1 text-xs font-semibold text-emerald-200">Guardado</span> : <span className="text-xs text-slate-400">Sin plan</span>}
+            {existing ? <span className="rounded-full bg-emerald-300/15 px-3 py-1 text-xs font-semibold text-emerald-200">Personalizado</span> : <span className="text-xs text-accent">{resolved.inherited ? "Heredado" : "Sin plan"}</span>}
           </div>
           <input id="budget-month" type="month" value={month} onChange={(e) => setMonth(e.target.value)}
             className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-base text-ink" required />
@@ -175,8 +202,9 @@ export function PlanPage() {
                   </label>
                   <label className="space-y-2 text-sm text-slate-300">
                     <span className="block">Porcentaje</span>
-                    <input type="number" min={0.01} max={100} step="0.01" value={group.percentage}
-                      onChange={(e) => patchGroup(group.id, { percentage: Number(e.target.value) })}
+                    <input type="text" inputMode="decimal" autoComplete="off" pattern="[0-9]+([.,][0-9]{1,2})?" value={percentageInputs[group.id] ?? String(group.percentage)}
+                      onChange={(e) => changePercentage(group.id, e.target.value)}
+                      onBlur={() => normalizePercentage(group.id)}
                       className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-2 text-base text-ink" required />
                   </label>
                 </div>
@@ -233,7 +261,12 @@ export function PlanPage() {
             );
           })}
         </div>
-        <button type="button" onClick={() => { setGroups((current) => [...current, newBudgetGroup()]); setSaved(false); }}
+        <button type="button" onClick={() => {
+            const group = newBudgetGroup();
+            setGroups((current) => [...current, group]);
+            setPercentageInputs((current) => ({ ...current, [group.id]: '' }));
+            setSaved(false);
+          }}
           disabled={groups.length >= 100}
           className="flex min-h-14 w-full items-center justify-center rounded-2xl border border-dashed border-accent/50 bg-accent/10 text-sm font-bold text-accent disabled:opacity-50">
           + Agregar grupo
@@ -244,11 +277,11 @@ export function PlanPage() {
             <p className="text-xs leading-5 text-slate-300">Los gastos de estas categorías seguirán en tu balance, pero no se mostrarán dentro de ninguna barra del plan: {unassigned.map((c) => c.name).join(', ')}.</p>
           </Card>
         ) : null}
-        {saveError || validation ? <p role="alert" className="rounded-xl bg-rose-300/10 p-3 text-sm text-rose-200">{saveError ?? validation}</p> : null}
+        {saveError || validation || incompletePercentage ? <p role="alert" className="rounded-xl bg-rose-300/10 p-3 text-sm text-rose-200">{saveError ?? (incompletePercentage ? 'Completa el porcentaje de cada grupo.' : validation)}</p> : null}
         {saved ? <p role="status" className="rounded-xl bg-emerald-300/10 p-3 text-sm text-emerald-200">Plan mensual guardado correctamente.</p> : null}
         <div className="space-y-2 rounded-2xl border border-white/10 bg-[#1d2027] p-3">
-          <Button type="submit" fullWidth size="lg" disabled={saving || !!validation || !!budgetsError}>
-            {saving ? 'Guardando...' : existing ? 'Guardar cambios del mes' : 'Guardar plan mensual'}
+          <Button type="submit" fullWidth size="lg" disabled={saving || !!validation || incompletePercentage || !!budgetsError}>
+            {saving ? 'Guardando...' : existing ? 'Guardar cambios del mes' : resolved.inherited ? 'Personalizar plan de este mes' : 'Guardar plan mensual'}
           </Button>
           <Link to="/dashboard" className="block py-2 text-center text-sm text-slate-300">Volver al inicio</Link>
         </div>
