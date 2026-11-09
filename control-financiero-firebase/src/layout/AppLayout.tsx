@@ -60,6 +60,14 @@ function SettingsIcon() {
 }
 
 
+function PlanIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M4 19V5M4 19h16M8 16v-5M13 16V7M18 16v-8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
 function TransactionsIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -79,11 +87,12 @@ function MoreIcon() {
 const MAIN_NAV_ITEMS = [
   { to: '/dashboard', label: 'Inicio', icon: DashboardIcon },
   { to: '/transactions', label: 'Movimientos', icon: TransactionsIcon },
+  { to: '/plan', label: 'Plan', icon: PlanIcon },
   { to: '/savings', label: 'Ahorro', icon: SavingsIcon },
-  { to: '/history', label: 'Historial', icon: HistoryIcon },
 ];
 
 const SECONDARY_NAV_ITEMS = [
+  { to: '/history', label: 'Historial', icon: HistoryIcon },
   { to: '/categories', label: 'Categorías', icon: CategoryIcon },
   { to: '/credits', label: 'Créditos', icon: CreditIcon },
   { to: '/settings', label: 'Ajustes', icon: SettingsIcon },
