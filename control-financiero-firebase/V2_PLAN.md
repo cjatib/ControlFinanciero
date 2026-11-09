@@ -4,7 +4,7 @@
 
 Esta fase agrega solo la colección `users/{uid}/monthlyBudgets/{YYYY-MM}`. No modifica ni elimina transacciones, categorías, créditos ni ahorros existentes.
 Cada documento contiene `month`, `incomeAmount`, `groups`, `createdAt` y `updatedAt`. El sueldo base configura límites, no crea un ingreso.
-Cada mes se guarda por separado. Un mes nuevo muestra una propuesta 50/30/20 pero solo se guarda al pulsar Guardar. Editar explícitamente un mes anterior modifica únicamente ese mes.
+Cada mes se guarda por separado. Si el mes no tiene plan propio, se muestra automáticamente el último plan guardado de un mes anterior (solo lectura; no se crea un documento). Si no existe ninguno, aparece una propuesta editable 50/30/20. Al modificar y guardar, se crea un documento exclusivo para el mes seleccionado sin modificar otros documentos mensuales. Los meses heredados que aún no tienen un documento propio reflejan la última versión del plan anterior hasta que se personalicen.
 Se permiten entre 1 y 100 grupos. Los porcentajes deben sumar exactamente 100%; una categoría de gasto no puede pertenecer a dos grupos, ni un plan de ahorro vincularse a dos grupos el mismo mes.
 Los gastos se calculan desde las transacciones existentes; los ahorros reales, desde las entradas de los planes. Los aportes de ahorro NO se descuentan otra vez del saldo de movimientos.
 
@@ -28,12 +28,12 @@ El archivo firebase.json apunta solamente a firestore.rules; no se despliega Hos
 
 ## Pruebas funcionales
 
-1. Iniciar sesión en el proyecto de desarrollo y verificar que Historial, Créditos y Ahorros sigan visibles.
+1. Iniciar sesión y verificar que Historial, Créditos y Ahorros sigan visibles. Si se prueba en PRD, no crear ni eliminar movimientos históricos para realizar estas pruebas.
 2. En Plan, crear varios grupos con porcentajes que sumen 100, vincular distintas categorías y un plan de ahorro y guardar.
 3. En Inicio, comprobar los montos de ingresos, gastos, saldo de movimientos y presupuesto mensual.
 4. Registrar, editar y eliminar un gasto de prueba vinculado a un grupo y verificar el progreso.
 5. Crear un aporte de prueba a un plan vinculado y comprobar que incrementa la meta de ahorro sin descontarlo dos veces del saldo.
-6. Crear un plan en otro mes y comprobar que no modifica el histórico del primer mes.
+6. Seleccionar diciembre tras guardar noviembre y comprobar que el plan de noviembre se aplica automáticamente sin tener que crearlo de nuevo. Después cambiar diciembre y guardar, y comprobar que noviembre conserva sus porcentajes.
 7. Intentar guardar un porcentaje total distinto de 100 y un plan de ahorro duplicado; se debe impedir.
 8. Verificar comportamiento en Safari para iPhone, navegación y teclado.
 
