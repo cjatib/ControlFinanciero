@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test:budget": "node --test tests/budget-inheritance.test.mjs",
     "test:analytics": "node --test tests/financial-analytics.test.mjs",
-    "test": "node --test tests/budget-inheritance.test.mjs tests/financial-analytics.test.mjs"
+    "test": "node --test tests/budget-inheritance.test.mjs tests/financial-analytics.test.mjs tests/historical-report.test.mjs",
+    "test:reports": "node --test tests/historical-report.test.mjs"
   },
   "dependencies": {
     "firebase": "13.2.0",
