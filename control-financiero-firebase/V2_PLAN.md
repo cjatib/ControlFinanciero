@@ -41,3 +41,15 @@ El archivo firebase.json apunta solamente a firestore.rules; no se despliega Hos
 
 Construir con npm y completar las pruebas anteriores. Revisar las 4 alertas altas de dependencias de producción @grpc/grpc-js/Firestore reportadas en la auditoría previa. No ejecutar npm audit fix --force automáticamente.
 La rama y el PR permanecen separados de main. La publicación de reglas y el despliegue en producción requieren validación independiente.
+
+## Dashboard V2 — análisis financiero (fase siguiente)
+
+- Comparación de ingresos y gastos con el mes inmediatamente anterior (usa fechas de transacciones, no presupuestos). Si el mes anterior no tiene importe de referencia, se muestra "Sin referencia", no un porcentaje ficticio.
+- Distribución de gastos por categoría (las cinco de mayor importe), mostrando monto, cantidad de movimientos y proporción del gasto total.
+- Resumen de presupuesto **solo de grupos de gasto**: monto asignado, consumido y disponible, sin sumar los objetivos de ahorro. Los gastos no asignados se notifican aparte; sí permanecen en el saldo mensual.
+- Alertas visuales al alcanzar 80 % de ejecución de cada grupo de gasto y cuando supera 100 %. El saldo de movimientos sigue siendo ingresos menos gastos registrados, no saldo bancario.
+- Las métricas se calculan solo en la interfaz; no hay nuevas colecciones ni cambios en las reglas de Firebase.
+
+### Pruebas
+
+Ejecutar `npm test` y `npm run build` desde la carpeta `control-financiero-firebase`. Comprobar en móvil que las tarjetas se adaptan a la pantalla, el orden de las principales categorías es correcto y las alertas aparecen y desaparecen cuando se modifican transacciones. No es necesario publicar reglas nuevas.
