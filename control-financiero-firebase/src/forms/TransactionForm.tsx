@@ -41,16 +41,20 @@ export function TransactionForm({ categories, initialValue, onSubmit, onCancel, 
 
   const filteredCategories = categories.filter((category) => category.type === formState.type);
 
+  // Keep the selected value while the category is valid. The filtered list
+  // is recreated on each render, so it must not be an effect dependency:
+  // otherwise resetting an already-empty selection causes a render loop.
   useEffect(() => {
-    const selectedCategory = filteredCategories.find((category) => category.id === formState.categoryId);
-
-    if (!selectedCategory) {
-      setFormState((current) => ({
-        ...current,
-        categoryId: '',
-      }));
+    if (!formState.categoryId) return;
+    const stillAvailable = categories.some(
+      (category) => category.id === formState.categoryId && category.type === formState.type,
+    );
+    if (!stillAvailable) {
+      setFormState((current) =>
+        current.categoryId === formState.categoryId ? { ...current, categoryId: '' } : current,
+      );
     }
-  }, [filteredCategories, formState.categoryId]);
+  }, [categories, formState.categoryId, formState.type]);
 
   function validate(): boolean {
     const nextErrors: Partial<Record<keyof TransactionState, string>> = {};
@@ -82,7 +86,7 @@ export function TransactionForm({ categories, initialValue, onSubmit, onCancel, 
       return;
     }
 
-    const selectedCategory = categories.find((category) => category.id === formState.categoryId);
+    const selectedCategory = categories.find((category) => category.id === formState.categoryId && category.type === formState.type);
 
     if (!selectedCategory) {
       setSubmitError('La categoria elegida ya no esta disponible.');
