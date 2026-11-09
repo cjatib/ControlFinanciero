@@ -22,8 +22,8 @@ jobs:
           cache-dependency-path: control-financiero-firebase/package-lock.json
       - name: Install dependencies
         run: npm ci
-      - name: Validate monthly budget inheritance
-        run: npm run test:budget
+      - name: Validate budget and financial analytics
+        run: npm test
       - name: TypeScript and Vite build
         run: npm run build
       - name: Configure Java for Firestore emulator
