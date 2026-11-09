@@ -85,3 +85,18 @@ Ejecutar `npm test` y `npm run build`. Probar **Más → Reportes** en navegador
 Desde control-financiero-firebase ejecutar `npm test` y `npm run build`. En Chrome y Safari iPhone abrir Reportes, cambiar 6/12/24 meses, descargar CSV, confirmar caracteres con tilde y montos numéricos, probar saldos negativos y usar Imprimir / Guardar PDF. Después navegar entre Inicio, Movimientos, Plan, Ahorro y Más para verificar que la carga diferida no afecte rutas o formularios. Comparar el tamaño de los recursos iniciales en DevTools Network antes/después si se necesita cuantificar el rendimiento.
 
 El despliegue de reglas Firestore no es necesario: esta fase no introduce colecciones ni operaciones de escritura.
+
+## Corrección de exportación PDF en iPhone (fase 5.1)
+
+El botón anterior dependía de `window.print()`, que no ofrece una salida fiable al usar Safari móvil o una PWA instalada. Se conserva la impresión de escritorio, pero **Guardar / Compartir PDF** ahora genera un archivo PDF A4 multipágina real en memoria (no HTML) y permite guardarlo desde el dispositivo.
+
+- El PDF incluye ingresos, gastos, aportes, balance y tabla mensual, además de principales categorías de gasto. Se genera localmente, sin enviar información a servicios externos.
+- En iOS con HTTPS y soporte `navigator.canShare({files})`, el botón abre la hoja nativa de Compartir para seleccionar **Guardar en Archivos**.
+- En acceso por IP local usando HTTP (`http://192.168.x.x:5173`) la Web Share API no está disponible por falta de contexto seguro; el mismo botón descarga el `.pdf` mediante Blob, como ya hace el CSV. Desde Safari, el archivo puede localizarse en Descargas y guardarse en Archivos.
+- Si el usuario cancela el menú Compartir, no se inicia otra descarga. Si compartir falla por un error técnico, intenta descarga directa.
+- La opción **Imprimir (escritorio)** conserva el comportamiento previo, con hoja de estilos A4.
+- Usa fuentes estándar PDF con caracteres españoles Windows-1252. El documento no incluye los gráficos SVG de la vista web; prioriza los montos exactos y la legibilidad de la tabla en móvil.
+
+### Pruebas de regresión
+
+Ejecutar `npm test`, `npm run build`, entrar a Reportes y probar **Guardar / Compartir PDF** tanto desde Safari iPhone como desde Chrome; verificar que el fichero `.pdf` se abre y muestra todas sus páginas, especialmente al escoger 24 meses. En iPhone por HTTP buscar el PDF en **Descargas** y usar Compartir/Guardar en Archivos. Confirmar que CSV mantiene el mismo comportamiento.
