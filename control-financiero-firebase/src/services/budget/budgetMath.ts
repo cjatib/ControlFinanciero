@@ -11,7 +11,7 @@ export interface BudgetGroupProgress {
 }
 
 export function validateMonthlyBudget(payload: MonthlyBudgetPayload): string | null {
-  if (!/^\\d{4}-(0[1-9]|1[0-2])$/.test(payload.month)) return 'Selecciona un mes válido.';
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(payload.month)) return 'Selecciona un mes válido.';
   if (!Number.isSafeInteger(payload.incomeAmount) || payload.incomeAmount <= 0) {
     return 'El sueldo base debe ser un monto entero mayor a cero.';
   }
