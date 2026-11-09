@@ -2,6 +2,8 @@
 
 ## Objetivo
 
+**Estado de fase 9:** la vista previa HTTPS ya fue probada en iPhone y Chrome; las dependencias de fase 8 están actualizadas. El procedimiento de go-live y los puntos de control definitivos están en **`V2_GO_LIVE.md`**. No se ha desplegado el canal `live`.
+
 Probar las actualizaciones de la PWA desde HTTPS real, **sin reemplazar el canal live de Firebase Hosting** y sin fusionar el Pull Request V2.
 Proyecto: **Control Financiero - PRD** (`control-financiero-49b07`), plan Spark.
 La URL de preview es pública y utiliza el mismo backend de Authentication y Firestore. No compartirla ni crear/borrar registros reales para hacer pruebas.
@@ -64,10 +66,10 @@ Firebase 13.2.0 se mantiene. Vite está actualizado a 6.4.5, esbuild a 0.25.12 y
 
 El último `npm audit --audit-level=moderate` realizado en GitHub Actions no reportó vulnerabilidades conocidas, tanto de producción como de desarrollo. Las pruebas y la compilación pasaron. Consulta `V2_SECURITY.md` para las referencias y las limitaciones de esta auditoría.
 
-**Pendiente:** repetir pruebas manuales en Safari iPhone sobre una nueva publicación HTTPS con las dependencias actualizadas. No ejecutar `npm audit fix --force` ni cambiar Firebase sin nuevas pruebas.
+**Completado:** la vista previa HTTPS posterior a la fase 8 funciona correctamente según las pruebas del usuario. Antes del paso a `live` se realizará una última comprobación del canal y del flujo de inicio de sesión. No ejecutar `npm audit fix --force` ni cambiar Firebase sin nuevas pruebas.
 ## 7. Condiciones antes de publicar live
 
-Validar Safari iPhone HTTPS, persistencia de sesión, actualización sin interrumpir trabajo, navegación, reglas y dependencias. Conservar procedimiento de reversión. **No fusionar main ni desplegar live hasta completar estas validaciones.**
+La versión HTTPS ya pasó pruebas funcionales del usuario; mantener la última comprobación de sesión y navegación, confirmar el canal correcto y conservar procedimiento de reversión. **No fusionar main ni desplegar live sin autorización explícita.**
 
 ## 8. Fase 8 — Seguridad aplicada y procedimiento de reversión
 
