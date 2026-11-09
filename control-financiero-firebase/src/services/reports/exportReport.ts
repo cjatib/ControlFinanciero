@@ -1,6 +1,6 @@
 import type { CategorySpending } from '@/services/analytics/financialAnalytics';
 import type { MonthlyReportRow } from '@/services/reports/historicalReport';
-import { summarizeHistoricalReport } from '@/services/reports/historicalReport';
+import { summarizeHistoricalReport } from './historicalReport.ts';
 
 function safeCsvCell(value: string | number): string {
   const raw = String(value);
