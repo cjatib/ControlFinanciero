@@ -22,7 +22,7 @@ function atLeast(value, minimum) {
   return true;
 }
 
-test('Firefox/Node-only gRPC transitives are overridden on every path, including Firestore', () => {
+test('Firestore transitive gRPC dependency versions are overridden on every path, including Firestore', () => {
   const override = pkg.overrides?.['@grpc/grpc-js'];
   assert.ok(override, 'Missing explicit patched gRPC override');
   assert.ok(atLeast(override, '1.14.6'), 'A known-vulnerable gRPC range is pinned');
