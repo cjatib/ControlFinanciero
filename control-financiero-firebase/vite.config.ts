@@ -5,31 +5,9 @@ import react from '@vitejs/plugin-react-swc';
 export default defineConfig({
   base: './',
   plugins: [react()],
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (!id.includes('node_modules')) {
-            return undefined;
-          }
-
-          if (id.includes('firebase')) {
-            return 'firebase';
-          }
-
-          if (id.includes('react-router')) {
-            return 'router';
-          }
-
-          if (id.includes('react')) {
-            return 'react-vendor';
-          }
-
-          return 'vendor';
-        },
-      },
-    },
-  },
+  // Let Rollup split route-level dynamic imports automatically.
+  // The former manualChunks rule forced every Firebase package into one
+  // 966 kB chunk, including modules not needed on the first screen.
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
