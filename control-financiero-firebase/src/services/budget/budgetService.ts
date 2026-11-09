@@ -3,6 +3,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { validateMonthlyBudget } from './budgetMath';
+import { getCurrentMonthValue } from '@/services/summary/summaryService';
 import type { MonthlyBudget, MonthlyBudgetDocument, MonthlyBudgetPayload } from '@/types/budget';
 
 function monthlyBudgetsCollection(uid: string) {
@@ -25,6 +26,11 @@ export function subscribeToMonthlyBudgets(
 }
 
 export async function saveMonthlyBudget(uid: string, payload: MonthlyBudgetPayload): Promise<void> {
+  // Past monthly configurations are historical records: changes only apply
+  // to the selected current/future month, never retroactively to past months.
+  if (payload.month < getCurrentMonthValue()) {
+    throw new Error('Los meses anteriores están cerrados y no pueden modificarse. Configura el mes actual.');
+  }
   const validationError = validateMonthlyBudget(payload);
   if (validationError) throw new Error(validationError);
   const ref = doc(monthlyBudgetsCollection(uid), payload.month);
