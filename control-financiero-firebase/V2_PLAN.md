@@ -24,7 +24,7 @@ npx firebase-tools login
 npx firebase-tools deploy --only firestore:rules --project TU_ID_DE_PROYECTO_DE_PRUEBAS
 ```
 
-El archivo firebase.json apunta solamente a firestore.rules; no se despliega Hosting ni se migran datos.
+El archivo firebase.json mantiene firestore.rules y, desde la fase 7, incorpora configuración de Firebase Hosting para una vista previa HTTPS. No se despliega Hosting ni se migran datos automáticamente.
 
 ## Pruebas funcionales
 
@@ -125,3 +125,7 @@ Ejecutar `npm test`, `npm run build`, entrar a Reportes y probar **Guardar / Com
 - Al 9 de noviembre de 2026 el `package-lock.json` aún incluye `@grpc/grpc-js` 1.9.16, traído transitivamente por Firebase/Firestore. Las alertas GHSA-m9gg-hp2v-232j y GHSA-f596-whhp-79r4 afectan principalmente funcionalidad de **servidor** gRPC; eso no implica automáticamente una vía explotable en la PWA cliente, pero se debe remediar la dependencia.
 - Los boletines de GitHub muestran versiones corregidas de las ramas 1.13.x y 1.14.x. Antes de cambiar una versión transitiva, comprobar `npm ls @grpc/grpc-js` y `npm audit --omit=dev`, preparar una actualización controlada y validar Firebase Auth/Firestore con datos de prueba. No ejecutar `npm audit fix --force` (proponía degradar Firebase).
 - Vite 5 / esbuild también sigue pendiente de una actualización mayor controlada, independiente de los cambios de PWA.
+
+## Fase 7 — Vista previa HTTPS segura
+
+Se preparó Firebase Hosting para servir la compilación `dist` con políticas correctas de caché para service worker e index, recursos versionados y encabezados de seguridad básicos. La vista previa requiere publicación manual a un canal temporal separado de `live`. Para las verificaciones y los comandos detallados, consultar **`V2_RELEASE.md`**. No modificar el sitio público hasta completar las pruebas en iPhone y la revisión de dependencias.
