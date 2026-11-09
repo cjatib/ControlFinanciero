@@ -78,3 +78,126 @@ input[type='number'] {
   }
 }
 
+
+
+/* Report preview stays compact on screen; the extra heading is printed only. */
+.print-only {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  :root {
+    color-scheme: light;
+  }
+
+  html, body, #root {
+    min-height: auto !important;
+    background: white !important;
+    color: #111827 !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  .print-hidden,
+  .report-filters,
+  nav[aria-label="Navegación principal"],
+  a[aria-label="Registrar nuevo movimiento"],
+  [role="menu"],
+  .report-print-area a {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+    margin-bottom: 12px;
+  }
+
+  .print-only h2 {
+    font-size: 21px;
+    font-weight: 800;
+  }
+
+  .print-only p {
+    font-size: 11px;
+    margin-top: 3px;
+  }
+
+  body:has(.report-print-area) main,
+  body:has(.report-print-area) main > div {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  body:has(.report-print-area) .relative.mx-auto {
+    max-width: none !important;
+    padding: 0 !important;
+    min-height: auto !important;
+  }
+
+  .report-print-area {
+    width: 100%;
+    color: #111827 !important;
+    font-size: 11px !important;
+  }
+
+  .report-print-area > * {
+    margin-top: 10px !important;
+  }
+
+  .report-print-area .glass-card,
+  .report-print-area [class*="rounded-2xl"] {
+    box-shadow: none !important;
+    border-color: #d1d5db !important;
+  }
+
+  .report-print-area .glass-card {
+    background: white !important;
+    break-inside: avoid;
+  }
+
+  .report-print-area h1,
+  .report-print-area h2,
+  .report-print-area h3,
+  .report-print-area p,
+  .report-print-area span,
+  .report-print-area th,
+  .report-print-area td {
+    color: #111827 !important;
+  }
+
+  .report-print-area [role="region"] {
+    overflow: visible !important;
+  }
+
+  .report-print-area svg {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .report-print-area table {
+    width: 100% !important;
+    min-width: 0 !important;
+    font-size: 9px !important;
+  }
+
+  .report-print-area table th,
+  .report-print-area table td {
+    padding: 5px 3px !important;
+  }
+
+  .report-print-area tr {
+    break-inside: avoid;
+  }
+
+  .report-print-area .grid {
+    gap: 7px !important;
+  }
+}
