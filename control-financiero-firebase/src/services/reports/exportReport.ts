@@ -6,7 +6,7 @@ function safeCsvCell(value: string | number): string {
   const raw = String(value);
   // Avoid spreadsheet formula execution (including formula prefixes hidden by whitespace).
   // Tabs and line breaks also get neutralized before CSV quoting.
-  const safe = /^[\s\u0000-\u001f]*[=+\-@]/u.test(raw) ? "'" + raw : raw;
+  const safe = typeof value === 'number' ? raw : /^[\s\u0000-\u001f]*[=+\-@]/u.test(raw) ? "'" + raw : raw;
   return '"' + safe.replace(/"/g, '""') + '"';
 }
 
