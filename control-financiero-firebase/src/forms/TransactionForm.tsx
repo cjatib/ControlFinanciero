@@ -142,7 +142,7 @@ export function TransactionForm({ categories, initialValue, onSubmit, onCancel, 
         disabled={filteredCategories.length === 0}
         onChange={(event) => setFormState((current) => ({ ...current, categoryId: event.target.value }))}
       >
-        {filteredCategories.length === 0 ? <option value="">No hay categorias disponibles</option> : null}
+        <option value="" disabled>{filteredCategories.length === 0 ? "No hay categorías disponibles" : "Selecciona una categoría"}</option>
         {filteredCategories.map((category) => (
           <option key={category.id} value={category.id}>
             {category.name}
