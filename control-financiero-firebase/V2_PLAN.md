@@ -100,3 +100,28 @@ El botón anterior dependía de `window.print()`, que no ofrece una salida fiabl
 ### Pruebas de regresión
 
 Ejecutar `npm test`, `npm run build`, entrar a Reportes y probar **Guardar / Compartir PDF** tanto desde Safari iPhone como desde Chrome; verificar que el fichero `.pdf` se abre y muestra todas sus páginas, especialmente al escoger 24 meses. En iPhone por HTTP buscar el PDF en **Descargas** y usar Compartir/Guardar en Archivos. Confirmar que CSV mantiene el mismo comportamiento.
+
+## Fase 6 — Actualizaciones y caché segura de PWA
+
+- El service worker ya no activa automáticamente nuevas versiones: presenta un aviso **Hay una nueva versión disponible** y deja al usuario elegir **Actualizar ahora** o **Más tarde**. Al elegir actualizar se recarga la aplicación; guardar previamente cualquier movimiento en edición.
+- Se comprueban actualizaciones al volver al primer plano o recuperar conexión, con límite de una comprobación cada 30 minutos para evitar consultas innecesarias.
+- La compilación genera un identificador único por versión a partir del index, nombres de recursos compilados, contenido del worker e iconos/manifiesto. Así un despliegue con recursos distintos produce un service worker diferente y puede ofrecer la actualización.
+- Caché limitada a la portada HTML de la aplicación, manifiesto, iconos y archivos estáticos con nombre versionado bajo /assets/. Los datos de Firebase y otros endpoints, incluidas rutas desconocidas del mismo origen, no se almacenan en Cache Storage del worker.
+- La navegación principal usa red primero y la portada se recupera de caché solo sin conexión. **Esto no convierte las transacciones en funcionalidad offline** ni garantiza que se puedan guardar movimientos sin conectividad.
+- Las cachés propias antiguas se eliminan durante la activación. El worker no toca cachés de otras aplicaciones del mismo origen.
+- Solo se registra en la compilación de producción (`npm run preview` o despliegue), en contextos seguros como HTTPS o `localhost`. **La URL `http://192.168.x.x:5173` usada en el iPhone no permite service workers**, y además `npm run dev` omite su registro. Para comprobar el aviso de actualización en iPhone se necesita servir la PWA desde HTTPS.
+- Para Hosting, configurar `Cache-Control: no-cache` para `sw.js` e `index.html`; los bundles versionados en `assets/` admiten caché prolongada. Esto depende del hosting real y no está desplegado por estos commits.
+
+### Pruebas
+
+1. Ejecutar `npm test`, `npm run build` y `npm run test:pwa-build`.
+2. En Chrome de escritorio, probar `npm run preview -- --host 127.0.0.1` y abrir localhost. Verificar en DevTools → Application → Service Workers que existe un worker activo.
+3. Desplegar **solo después de validar en HTTPS**. Abrir la PWA instalada, publicar una versión nueva y volver a la aplicación: debe aparecer el aviso. Pulsar «Más tarde» y confirmar que no recarga; luego «Actualizar ahora» y verificar recarga.
+4. Comprobar en DevTools → Application → Cache Storage que no aparecen JSON de transacciones, respuestas Firestore ni datos personales; solo shell y recursos estáticos.
+5. Verificar que las transacciones, ahorros, créditos y presupuestos se siguen consultando online; no se introdujeron reglas ni migraciones de Firebase.
+
+### Dependencias de seguridad pendientes
+
+- Al 9 de noviembre de 2026 el `package-lock.json` aún incluye `@grpc/grpc-js` 1.9.16, traído transitivamente por Firebase/Firestore. Las alertas GHSA-m9gg-hp2v-232j y GHSA-f596-whhp-79r4 afectan principalmente funcionalidad de **servidor** gRPC; eso no implica automáticamente una vía explotable en la PWA cliente, pero se debe remediar la dependencia.
+- Los boletines de GitHub muestran versiones corregidas de las ramas 1.13.x y 1.14.x. Antes de cambiar una versión transitiva, comprobar `npm ls @grpc/grpc-js` y `npm audit --omit=dev`, preparar una actualización controlada y validar Firebase Auth/Firestore con datos de prueba. No ejecutar `npm audit fix --force` (proponía degradar Firebase).
+- Vite 5 / esbuild también sigue pendiente de una actualización mayor controlada, independiente de los cambios de PWA.
