@@ -39,7 +39,7 @@ El archivo firebase.json mantiene firestore.rules y, desde la fase 7, incorpora 
 
 ## Pendientes antes de fusionar
 
-Construir con npm y completar las pruebas anteriores. Revisar las 4 alertas altas de dependencias de producción @grpc/grpc-js/Firestore reportadas en la auditoría previa. No ejecutar npm audit fix --force automáticamente.
+Compilar y completar las pruebas manuales en HTTPS con las nuevas dependencias. Las alertas anteriores de @grpc/grpc-js y Vite/esbuild fueron corregidas en fase 8; `npm audit` completo reportó 0 vulnerabilidades. No ejecutar `npm audit fix --force`.
 La rama y el PR permanecen separados de main. La publicación de reglas y el despliegue en producción requieren validación independiente.
 
 ## Dashboard V2 — análisis financiero (fase siguiente)
@@ -120,12 +120,15 @@ Ejecutar `npm test`, `npm run build`, entrar a Reportes y probar **Guardar / Com
 4. Comprobar en DevTools → Application → Cache Storage que no aparecen JSON de transacciones, respuestas Firestore ni datos personales; solo shell y recursos estáticos.
 5. Verificar que las transacciones, ahorros, créditos y presupuestos se siguen consultando online; no se introdujeron reglas ni migraciones de Firebase.
 
-### Dependencias de seguridad pendientes
+### Dependencias de seguridad — fase 8 completada
 
-- Al 9 de noviembre de 2026 el `package-lock.json` aún incluye `@grpc/grpc-js` 1.9.16, traído transitivamente por Firebase/Firestore. Las alertas GHSA-m9gg-hp2v-232j y GHSA-f596-whhp-79r4 afectan principalmente funcionalidad de **servidor** gRPC; eso no implica automáticamente una vía explotable en la PWA cliente, pero se debe remediar la dependencia.
-- Los boletines de GitHub muestran versiones corregidas de las ramas 1.13.x y 1.14.x. Antes de cambiar una versión transitiva, comprobar `npm ls @grpc/grpc-js` y `npm audit --omit=dev`, preparar una actualización controlada y validar Firebase Auth/Firestore con datos de prueba. No ejecutar `npm audit fix --force` (proponía degradar Firebase).
-- Vite 5 / esbuild también sigue pendiente de una actualización mayor controlada, independiente de los cambios de PWA.
-
+- La versión transitiva de `@grpc/grpc-js` está corregida a 1.14.7 mediante override; Vite 6.4.5 y esbuild 0.25.12 reemplazan las ramas vulnerables. Firebase conserva 13.2.0.
+- `npm audit` de producción y de todas las dependencias mostró 0 vulnerabilidades en GitHub Actions; CI vigila regresiones. Referencia: `V2_SECURITY.md`.
+- **Pendiente de validación manual:** repetir pruebas Chrome/iPhone HTTPS, con especial atención a Firebase Auth/Firestore y al sistema de actualizaciones de PWA.
 ## Fase 7 — Vista previa HTTPS segura
 
 Se preparó Firebase Hosting para servir la compilación `dist` con políticas correctas de caché para service worker e index, recursos versionados y encabezados de seguridad básicos. La vista previa requiere publicación manual a un canal temporal separado de `live`. Para las verificaciones y los comandos detallados, consultar **`V2_RELEASE.md`**. No modificar el sitio público hasta completar las pruebas en iPhone y la revisión de dependencias.
+
+## Fase 8 — Estabilización y publicación
+
+Se preparó la auditoría CI, pruebas de versiones y documentación de reversión de Hosting. Ver `V2_SECURITY.md` y `V2_RELEASE.md`. No se publicará el canal live ni fusionará `main` sin confirmación de pruebas manuales tras la actualización de dependencias.
