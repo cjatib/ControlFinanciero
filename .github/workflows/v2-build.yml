@@ -24,3 +24,10 @@ jobs:
         run: npm ci
       - name: TypeScript and Vite build
         run: npm run build
+      - name: Configure Java for Firestore emulator
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Validate Firestore rules with local emulator
+        run: npx --yes firebase-tools@15.35.0 emulators:exec --only firestore --project demo-control-financiero "node -e \"console.log('Firestore emulator started and rules parsed')\""
