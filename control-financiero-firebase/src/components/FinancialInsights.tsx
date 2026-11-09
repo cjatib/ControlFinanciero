@@ -57,9 +57,14 @@ export function FinancialInsights({
 
   return (
     <section className="space-y-4" aria-labelledby="insights-title">
-      <div>
-        <p className="text-xs font-bold uppercase tracking-[0.22em] text-accent">Análisis mensual</p>
-        <h2 id="insights-title" className="mt-1 text-xl font-extrabold text-ink">Cómo va tu dinero</h2>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.22em] text-accent">Análisis mensual</p>
+          <h2 id="insights-title" className="mt-1 text-xl font-extrabold text-ink">Cómo va tu dinero</h2>
+        </div>
+        <Link to="/reports" className="rounded-xl bg-accent/15 px-3 py-2 text-xs font-bold text-accent">
+          Ver reportes históricos
+        </Link>
       </div>
 
       {hasBudget && (
