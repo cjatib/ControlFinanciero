@@ -16,7 +16,8 @@
     "test:pwa": "node --test tests/pwa.test.mjs",
     "test:pwa-build": "node scripts/verify-sw.mjs",
     "test:hosting": "node --test tests/hosting-config.test.mjs",
-    "audit:security": "npm audit --audit-level=moderate"
+    "audit:security": "npm audit --audit-level=moderate",
+    "release:check": "node scripts/release-preflight.mjs"
   },
   "dependencies": {
     "firebase": "13.2.0",
