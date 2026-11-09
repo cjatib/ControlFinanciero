@@ -112,9 +112,21 @@ export function DashboardPage() {
         <p className="mt-12 text-4xl font-extrabold tracking-tight sm:text-5xl">
           {formatCurrency(summary.balance, currency)}
         </p>
-        <svg viewBox="0 0 330 80" className="mt-4 w-full" fill="none" aria-hidden="true">
-          <path d="M0 64 L48 61 L94 46 L136 47 L167 31 L204 38 L241 20 L281 27 L330 10" stroke="#5e77b4" strokeWidth="3" strokeLinecap="round" opacity=".65" />
-        </svg>
+        {summary.totalIncome > 0 ? (
+          <div className="mt-7 space-y-2">
+            <div className="flex justify-between text-xs font-semibold text-[#344b83]">
+              <span>Proporción gastada de los ingresos registrados</span>
+              <span>{Math.round(summary.totalExpense / summary.totalIncome * 100)}%</span>
+            </div>
+            <div className="h-3 overflow-hidden rounded-full bg-[#6883bf]/20" role="progressbar"
+              aria-valuemin={0} aria-valuemax={100}
+              aria-valuenow={Math.round(Math.min(100, summary.totalExpense / summary.totalIncome * 100))}>
+              <div className="h-full rounded-full bg-[#4665a8]" style={{
+                width: String(Math.min(100, summary.totalExpense / summary.totalIncome * 100)) + '%',
+              }} />
+            </div>
+          </div>
+        ) : <p className="mt-7 text-xs font-semibold text-[#344b83]">Sin ingresos registrados para calcular proporción de gasto.</p>}
         <p className="mt-1 text-xs leading-5 text-[#344b83]">Ingresos menos gastos registrados en este mes. No representa el saldo bancario ni descuenta los ahorros por segunda vez.</p>
       </Card>
 
