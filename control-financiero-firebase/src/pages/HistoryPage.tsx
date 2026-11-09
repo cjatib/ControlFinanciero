@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { TransactionListItem } from '@/components/TransactionListItem';
 import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Loader } from '@/components/ui/Loader';
@@ -37,6 +38,7 @@ export function HistoryPage() {
   const [filters, setFilters] = useState<TransactionFilters>(INITIAL_FILTERS);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [transactionPendingDelete, setTransactionPendingDelete] = useState<Transaction | null>(null);
 
   if (loading) {
@@ -131,12 +133,23 @@ export function HistoryPage() {
         title="Editar transaccion"
         description="Actualiza el monto, categoria o fecha del movimiento seleccionado."
         onClose={closeModal}
+        footer={
+          <div className="flex flex-col gap-2">
+            <Button form="history-transaction-editor" type="submit" fullWidth size="lg" disabled={submitting || categories.length === 0}>
+              {submitting ? 'Guardando...' : 'Guardar cambios'}
+            </Button>
+            <Button variant="ghost" type="button" fullWidth onClick={closeModal} disabled={submitting}>Cancelar</Button>
+          </div>
+        }
       >
         <TransactionForm
           categories={categories}
           initialValue={selectedTransaction}
           onSubmit={handleCreateOrUpdate}
           onCancel={closeModal}
+          formId="history-transaction-editor"
+          hideActions
+          onSubmittingChange={setSubmitting}
         />
       </Modal>
 
