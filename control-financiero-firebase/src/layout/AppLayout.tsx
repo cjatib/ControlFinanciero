@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { InstallPromptBanner } from '@/components/InstallPromptBanner';
+import { PwaUpdateBanner } from '@/components/PwaUpdateBanner';
 import { cn } from '@/lib/cn';
 
 function DashboardIcon() {
@@ -122,6 +123,7 @@ export function AppLayout() {
       <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-4 pt-5 sm:max-w-6xl sm:px-6 lg:px-8"
         style={{ paddingBottom: 'calc(8rem + env(safe-area-inset-bottom))' }}>
         <main className="flex-1 space-y-6 pt-2">
+          <PwaUpdateBanner />
           <InstallPromptBanner />
           <Outlet />
         </main>
