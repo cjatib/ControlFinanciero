@@ -76,6 +76,72 @@ service cloud.firestore {
         && optionalString(data, 'description');
     }
 
+    function validMonthlyBudget(data, monthId) {
+      return data.keys().hasOnly(['month', 'incomeAmount', 'groups', 'createdAt', 'updatedAt'])
+        && data.keys().hasAll(['month', 'incomeAmount', 'groups', 'createdAt', 'updatedAt'])
+        && data.month is string
+        && data.month == monthId
+        && data.month.matches('^[0-9]{4}-(0[1-9]|1[0-2])
+      allow read, write: if isOwner(userId);
+
+      match /monthlyBudgets/{monthId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId)
+          && validMonthlyBudget(request.resource.data, monthId);
+        allow update: if isOwner(userId)
+          && validMonthlyBudget(request.resource.data, monthId)
+          && request.resource.data.createdAt == resource.data.createdAt;
+        allow delete: if false;
+      }
+
+      match /categories/{categoryId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validCategory(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      match /transactions/{transactionId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validTransaction(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      match /credits/{creditId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validCredit(request.resource.data);
+        allow delete: if isOwner(userId);
+
+        match /installments/{installmentId} {
+          allow read: if isOwner(userId);
+          allow create, update: if isOwner(userId) && validCreditInstallment(request.resource.data);
+          allow delete: if isOwner(userId);
+        }
+      }
+
+      match /savingsPlans/{savingsPlanId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validSavingsPlan(request.resource.data);
+        allow delete: if isOwner(userId);
+
+        match /entries/{entryId} {
+          allow read: if isOwner(userId);
+          allow create, update: if isOwner(userId) && validSavingsEntry(request.resource.data);
+          allow delete: if isOwner(userId);
+        }
+      }
+    }
+  }
+}
+)
+        && data.incomeAmount is int
+        && data.incomeAmount > 0
+        && data.groups is list
+        && data.groups.size() > 0
+        && data.groups.size() <= 100
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
     match /users/{userId} {
       allow read, write: if isOwner(userId);
 
