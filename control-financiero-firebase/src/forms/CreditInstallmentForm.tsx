@@ -153,9 +153,6 @@ export function CreditInstallmentForm({
       ) : null}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-        <Button variant="ghost" fullWidth size="lg" type="button" onClick={onCancel}>
-          Cancelar
-        </Button>
         <Button
           fullWidth
           size="lg"
@@ -163,6 +160,9 @@ export function CreditInstallmentForm({
           disabled={submitting || (!initialValue && remainingInstallments <= 0)}
         >
           {submitting ? 'Guardando...' : initialValue ? 'Actualizar cuota' : 'Registrar cuota'}
+        </Button>
+        <Button variant="ghost" fullWidth size="lg" type="button" onClick={onCancel} disabled={submitting}>
+          Cancelar
         </Button>
       </div>
     </form>
