@@ -58,15 +58,13 @@ npx firebase-tools hosting:channel:delete v2-pruebas --project control-financier
 ```
 También vence a los siete días. Si autorizaste el hostname temporal en Firebase Authentication, retirarlo de la lista de dominios.
 
-## 6. Seguridad de dependencias: revisión pendiente independiente
+## 6. Seguridad de dependencias: resuelta en la fase 8
 
-El lockfile conserva `@grpc/grpc-js` 1.9.16, marcado por avisos de 2026. Afectan principalmente configuraciones de servidor gRPC, no necesariamente la ejecución en el navegador, pero corresponde corregirlos.
-No usar `npm audit fix --force`: propone degradar Firebase. Para una actualización controlada:
-- Registrar `npm ls @grpc/grpc-js` y `npm audit --omit=dev`.
-- Actualizar la dependencia transitiva a una versión corregida con `overrides` y regenerar `package-lock.json` con npm.
-- Ejecutar `npm ci`, `npm test`, `npm run build` y comprobar Firebase Auth/Firestore en la PWA.
-- Tratar Vite/esbuild en otra actualización, separada del despliegue HTTPS.
+Firebase 13.2.0 se mantiene. Vite está actualizado a 6.4.5, esbuild a 0.25.12 y gRPC transitivo a 1.14.7. El archivo `package-lock.json` fue regenerado y confirmado con una instalación limpia.
 
+El último `npm audit --audit-level=moderate` realizado en GitHub Actions no reportó vulnerabilidades conocidas, tanto de producción como de desarrollo. Las pruebas y la compilación pasaron. Consulta `V2_SECURITY.md` para las referencias y las limitaciones de esta auditoría.
+
+**Pendiente:** repetir pruebas manuales en Safari iPhone sobre una nueva publicación HTTPS con las dependencias actualizadas. No ejecutar `npm audit fix --force` ni cambiar Firebase sin nuevas pruebas.
 ## 7. Condiciones antes de publicar live
 
 Validar Safari iPhone HTTPS, persistencia de sesión, actualización sin interrumpir trabajo, navegación, reglas y dependencias. Conservar procedimiento de reversión. **No fusionar main ni desplegar live hasta completar estas validaciones.**
