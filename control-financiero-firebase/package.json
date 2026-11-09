@@ -13,7 +13,8 @@
     "test:reports": "node --test tests/historical-report.test.mjs",
     "test:export": "node --test tests/report-export.test.mjs",
     "test:pdf": "node --test tests/report-pdf.test.mjs",
-    "test:pwa": "node --test tests/pwa.test.mjs"
+    "test:pwa": "node --test tests/pwa.test.mjs",
+    "test:pwa-build": "node scripts/verify-sw.mjs"
   },
   "dependencies": {
     "firebase": "13.2.0",
