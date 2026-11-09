@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { downloadReportCsv, reportCsvFilename, serializeHistoricalReportCsv } from '@/services/reports/exportReport';
+import { createHistoricalReportPdf, reportPdfFilename, shareOrDownloadReportPdf } from '@/services/reports/exportPdf';
 import { Link } from 'react-router-dom';
 import { MonthlyChart } from '@/components/reports/MonthlyChart';
 import { Card } from '@/components/ui/Card';
@@ -82,6 +83,21 @@ export function ReportsPage() {
     }
   }
 
+  async function handleExportPdf() {
+    try {
+      // All PDF bytes are built inside the direct click handler, before the
+      // native share call (required by the iOS user-activation policy).
+      const pdf = createHistoricalReportPdf(rows, categoryTotals);
+      const filename = reportPdfFilename(endMonth, period);
+      const result = await shareOrDownloadReportPdf(pdf, filename);
+      setExportError(result === 'downloaded'
+        ? 'PDF generado. En iPhone, revisa Descargas o abre el archivo y usa Compartir → Guardar en Archivos.'
+        : null);
+    } catch (failure) {
+      setExportError(failure instanceof Error ? failure.message : 'No se pudo generar el archivo PDF.');
+    }
+  }
+
   return (
     <div className="report-print-area space-y-5">
       <PageHeader
@@ -130,13 +146,17 @@ export function ReportsPage() {
             className="inline-flex min-h-12 flex-1 items-center justify-center rounded-2xl bg-accent px-4 text-sm font-extrabold text-slate-950 sm:flex-none">
             Descargar CSV (Excel)
           </button>
-          <button type="button" onClick={() => window.print()}
+          <button type="button" onClick={handleExportPdf}
             className="inline-flex min-h-12 flex-1 items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-4 text-sm font-semibold text-slate-100 sm:flex-none">
-            Imprimir / Guardar PDF
+            Guardar / Compartir PDF
+          </button>
+          <button type="button" onClick={() => window.print()}
+            className="hidden min-h-12 items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-4 text-sm font-semibold text-slate-100 sm:inline-flex">
+            Imprimir (escritorio)
           </button>
         </div>
       ) : null}
-      {exportError ? <p role="alert" className="print-hidden rounded-xl bg-rose-300/10 p-3 text-sm text-rose-200">{exportError}</p> : null}
+      {exportError ? <p role="status" className="print-hidden rounded-xl bg-accent/10 p-3 text-sm text-accent">{exportError}</p> : null}
 
       {error ? (
         <Card className="space-y-2 p-5" role="alert">
