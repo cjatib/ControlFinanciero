@@ -10,6 +10,7 @@ import { HistoryPage } from '@/pages/HistoryPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { PlanPage } from '@/pages/PlanPage';
 import { RegisterPage } from '@/pages/RegisterPage';
+import { ReportsPage } from '@/pages/ReportsPage';
 import { SavingsPage } from '@/pages/SavingsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { TransactionsPage } from '@/pages/TransactionsPage';
@@ -66,6 +67,10 @@ export const router = createHashRouter([
           {
             path: '/plan',
             element: <PlanPage />,
+          },
+          {
+            path: '/reports',
+            element: <ReportsPage />,
           },
           {
             path: '/history',
