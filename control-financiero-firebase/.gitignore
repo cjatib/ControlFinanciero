@@ -5,3 +5,17 @@ dist
 .env.local
 .env.*.local
 
+# Archivos temporales generados por TypeScript/Vite
+*.tsbuildinfo
+/vite.config.js
+/vite.config.js.map
+/tailwind.config.js
+/tailwind.config.js.map
+
+# Cache y registros de Firebase CLI / emuladores
+/.firebase/
+/firebase-debug.log
+/firestore-debug.log
+/ui-debug.log
+/*-debug.log
+
