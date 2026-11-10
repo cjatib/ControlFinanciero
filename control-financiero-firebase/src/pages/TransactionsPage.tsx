@@ -25,6 +25,7 @@ export function TransactionsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (searchParams.get('create') === '1') {
@@ -82,7 +83,7 @@ export function TransactionsPage() {
         eyebrow="Transacciones"
         title="Registra ingresos y gastos"
         description="Mantén tu flujo actualizado con transacciones editables, seguras y asociadas a tus categorias."
-        action={<Button onClick={() => setModalOpen(true)}>Nueva transaccion</Button>}
+        action={<div className="hidden sm:block"><Button onClick={() => setModalOpen(true)}>Nueva transacción</Button></div>}
       />
 
       {error ? <Card className="p-5 text-sm text-rose-200">{error}</Card> : null}
@@ -124,12 +125,23 @@ export function TransactionsPage() {
         title={selectedTransaction ? 'Editar transaccion' : 'Nueva transaccion'}
         description="Guarda el monto, categoria y fecha para mantener tu balance al dia."
         onClose={closeModal}
+        footer={
+          <div className="flex flex-col gap-2">
+            <Button form="transaction-editor" type="submit" fullWidth size="lg" disabled={submitting || categories.length === 0}>
+              {submitting ? 'Guardando...' : selectedTransaction ? 'Guardar cambios' : 'Guardar movimiento'}
+            </Button>
+            <Button variant="ghost" type="button" fullWidth onClick={closeModal} disabled={submitting}>Cancelar</Button>
+          </div>
+        }
       >
         <TransactionForm
           categories={categories}
           initialValue={selectedTransaction}
           onSubmit={handleCreateOrUpdate}
           onCancel={closeModal}
+          formId="transaction-editor"
+          hideActions
+          onSubmittingChange={setSubmitting}
         />
       </Modal>
     </div>

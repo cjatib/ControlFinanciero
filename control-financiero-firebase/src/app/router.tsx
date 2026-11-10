@@ -3,15 +3,9 @@ import { AuthLayout } from '@/layout/AuthLayout';
 import { AppLayout } from '@/layout/AppLayout';
 import { ProtectedRoute } from '@/layout/ProtectedRoute';
 import { PublicRoute } from '@/layout/PublicRoute';
-import { CategoriesPage } from '@/pages/CategoriesPage';
-import { CreditsPage } from '@/pages/CreditsPage';
 import { DashboardPage } from '@/pages/DashboardPage';
-import { HistoryPage } from '@/pages/HistoryPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { RegisterPage } from '@/pages/RegisterPage';
-import { SavingsPage } from '@/pages/SavingsPage';
-import { SettingsPage } from '@/pages/SettingsPage';
-import { TransactionsPage } from '@/pages/TransactionsPage';
 
 export const router = createHashRouter([
   {
@@ -48,27 +42,35 @@ export const router = createHashRouter([
           },
           {
             path: '/categories',
-            element: <CategoriesPage />,
+            lazy: async () => ({ Component: (await import('@/pages/CategoriesPage')).CategoriesPage }),
           },
           {
             path: '/credits',
-            element: <CreditsPage />,
+            lazy: async () => ({ Component: (await import('@/pages/CreditsPage')).CreditsPage }),
           },
           {
             path: '/savings',
-            element: <SavingsPage />,
+            lazy: async () => ({ Component: (await import('@/pages/SavingsPage')).SavingsPage }),
           },
           {
             path: '/transactions',
-            element: <TransactionsPage />,
+            lazy: async () => ({ Component: (await import('@/pages/TransactionsPage')).TransactionsPage }),
+          },
+          {
+            path: '/plan',
+            lazy: async () => ({ Component: (await import('@/pages/PlanPage')).PlanPage }),
+          },
+          {
+            path: '/reports',
+            lazy: async () => ({ Component: (await import('@/pages/ReportsPage')).ReportsPage }),
           },
           {
             path: '/history',
-            element: <HistoryPage />,
+            lazy: async () => ({ Component: (await import('@/pages/HistoryPage')).HistoryPage }),
           },
           {
             path: '/settings',
-            element: <SettingsPage />,
+            lazy: async () => ({ Component: (await import('@/pages/SettingsPage')).SettingsPage }),
           },
         ],
       },

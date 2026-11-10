@@ -1,0 +1,41 @@
+name: V2 build validation
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [feature/control-financiero-v2]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: control-financiero-firebase
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.12.0'
+          cache: npm
+          cache-dependency-path: control-financiero-firebase/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Security audit of production and development dependencies
+        run: npm audit --audit-level=moderate
+      - name: Validate budget and financial analytics
+        run: npm test
+      - name: TypeScript and Vite build
+        run: npm run build
+      - name: Validate release-specific service worker
+        run: npm run test:pwa-build
+      - name: Validate release candidate configuration
+        run: node scripts/release-preflight.mjs --ci
+      - name: Configure Java for Firestore emulator
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Validate Firestore rules with local emulator
+        run: npx --yes firebase-tools@15.35.0 emulators:exec --only firestore --project demo-control-financiero "node -e \"console.log('Firestore emulator started and rules parsed')\""

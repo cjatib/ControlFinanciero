@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { InstallPromptBanner } from '@/components/InstallPromptBanner';
+import { PwaUpdateBanner } from '@/components/PwaUpdateBanner';
 import { cn } from '@/lib/cn';
 
 function DashboardIcon() {
@@ -58,48 +60,70 @@ function SettingsIcon() {
   );
 }
 
-const NAV_ITEMS = [
-  {
-    to: '/dashboard',
-    label: 'Inicio',
-    icon: DashboardIcon,
-  },
-  {
-    to: '/categories',
-    label: 'Categorias',
-    icon: CategoryIcon,
-  },
-  {
-    to: '/credits',
-    label: 'Credito',
-    icon: CreditIcon,
-  },
-  {
-    to: '/savings',
-    label: 'Ahorro',
-    icon: SavingsIcon,
-  },
-  {
-    to: '/history',
-    label: 'Historial',
-    icon: HistoryIcon,
-  },
-  {
-    to: '/settings',
-    label: 'Ajustes',
-    icon: SettingsIcon,
-  },
+
+function PlanIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M4 19V5M4 19h16M8 16v-5M13 16V7M18 16v-8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function TransactionsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h11M7 4v6M17 9v6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ReportsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M4 19V5M4 19h16M8 15v-5M13 15V7M18 15v-8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function MoreIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+const MAIN_NAV_ITEMS = [
+  { to: '/dashboard', label: 'Inicio', icon: DashboardIcon },
+  { to: '/transactions', label: 'Movimientos', icon: TransactionsIcon },
+  { to: '/plan', label: 'Plan', icon: PlanIcon },
+  { to: '/savings', label: 'Ahorro', icon: SavingsIcon },
+];
+
+const SECONDARY_NAV_ITEMS = [
+  { to: '/history', label: 'Historial', icon: HistoryIcon },
+  { to: '/reports', label: 'Reportes', icon: ReportsIcon },
+  { to: '/categories', label: 'Categorías', icon: CategoryIcon },
+  { to: '/credits', label: 'Créditos', icon: CreditIcon },
+  { to: '/settings', label: 'Ajustes', icon: SettingsIcon },
 ];
 
 export function AppLayout() {
   const location = useLocation();
+  const [moreOpen, setMoreOpen] = useState(false);
+  const isSecondary = SECONDARY_NAV_ITEMS.some((item) => location.pathname.startsWith(item.to));
+
+  useEffect(() => {
+    setMoreOpen(false);
+  }, [location.pathname]);
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-[100dvh] overflow-x-hidden">
       <div className="pointer-events-none absolute inset-0 bg-noise opacity-90" />
-      <div className="pointer-events-none absolute left-1/2 top-[-8rem] h-80 w-80 -translate-x-1/2 rounded-full bg-accent/10 blur-3xl" />
-      <div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-28 pt-4 sm:max-w-6xl sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-4 pt-5 sm:max-w-6xl sm:px-6 lg:px-8"
+        style={{ paddingBottom: 'calc(8rem + env(safe-area-inset-bottom))' }}>
         <main className="flex-1 space-y-6 pt-2">
+          <PwaUpdateBanner />
           <InstallPromptBanner />
           <Outlet />
         </main>
@@ -107,38 +131,64 @@ export function AppLayout() {
 
       <Link
         to="/transactions?create=1"
-        className={cn(
-          'fixed bottom-[5.35rem] right-5 z-30 inline-flex h-11 w-11 items-center justify-center rounded-full bg-accent text-white shadow-[0_10px_20px_rgba(53,217,165,0.24)] transition hover:scale-[1.03] hover:bg-[#69e8be] sm:right-8',
-          location.pathname === '/transactions' && 'ring-4 ring-accent/20',
-        )}
-        aria-label="Agregar transaccion"
+        className="fixed right-5 z-30 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-slate-950 shadow-[0_12px_30px_rgba(183,198,250,0.28)] transition hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/50 sm:right-8"
+        style={{ bottom: 'calc(6.2rem + env(safe-area-inset-bottom))' }}
+        aria-label="Registrar nuevo movimiento"
       >
-        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2">
+        <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" stroke="currentColor" strokeWidth="2.3" aria-hidden="true">
           <path d="M12 5v14M5 12h14" strokeLinecap="round" />
         </svg>
       </Link>
 
-      <nav className="fixed inset-x-0 bottom-4 z-20 px-4 sm:px-6">
-        <div className="mx-auto grid max-w-md grid-cols-6 items-center rounded-[1.8rem] border border-white/10 bg-slate-950/80 px-2 py-2 shadow-glow backdrop-blur-xl sm:max-w-6xl">
-          {NAV_ITEMS.map((item) => {
+      {moreOpen ? (
+        <>
+          <button type="button" className="fixed inset-0 z-30 bg-slate-950/50" aria-label="Cerrar menú Más"
+            onClick={() => setMoreOpen(false)} />
+          <div className="fixed inset-x-4 z-40 mx-auto max-w-md rounded-3xl border border-white/10 bg-[#232630] p-3 shadow-2xl sm:max-w-lg"
+            style={{ bottom: 'calc(6.8rem + env(safe-area-inset-bottom))' }} role="menu" aria-label="Más secciones">
+            <p className="px-3 py-2 text-xs font-semibold uppercase tracking-widest text-slate-400">Más secciones</p>
+            <div className="grid grid-cols-1 gap-1">
+              {SECONDARY_NAV_ITEMS.map((item) => {
+                const Icon = item.icon;
+                const active = location.pathname.startsWith(item.to);
+                return (
+                  <Link key={item.to} to={item.to} role="menuitem" onClick={() => setMoreOpen(false)}
+                    className={cn('flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition',
+                      active ? 'bg-accent/15 text-accent' : 'text-slate-200 hover:bg-white/10')}>
+                    <Icon />
+                    <span>{item.label}</span>
+                    {active ? <span className="ml-auto text-xs">Actual</span> : null}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      ) : null}
+
+      <nav className="fixed inset-x-0 z-40 px-3 sm:px-6" style={{ bottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
+        aria-label="Navegación principal">
+        <div className="mx-auto grid max-w-md grid-cols-5 items-center gap-1 rounded-[1.6rem] border border-white/10 bg-[#242630]/95 p-2 shadow-glow backdrop-blur-xl sm:max-w-3xl">
+          {MAIN_NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             return (
-              <div key={item.to}>
-                <NavLink
-                  to={item.to}
-                  className={({ isActive }) =>
-                    cn(
-                      'flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[9px] font-semibold tracking-[0.04em] text-slate-500 transition',
-                      isActive && 'bg-white/6 text-ink',
-                    )
-                  }
-                >
-                  <Icon />
-                  <span className="text-center leading-tight">{item.label}</span>
-                </NavLink>
-              </div>
+              <NavLink key={item.to} to={item.to}
+                className={({ isActive }) => cn(
+                  'flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2.5 text-[10px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                  isActive ? 'bg-accent text-slate-950' : 'text-slate-300 hover:bg-white/10',
+                )}>
+                <Icon />
+                <span className="truncate">{item.label}</span>
+              </NavLink>
             );
           })}
+          <button type="button" onClick={() => setMoreOpen((v) => !v)} aria-expanded={moreOpen}
+            aria-haspopup="menu" aria-label="Más secciones"
+            className={cn('flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2.5 text-[10px] font-semibold transition',
+              moreOpen || isSecondary ? 'bg-accent text-slate-950' : 'text-slate-300 hover:bg-white/10')}>
+            <MoreIcon />
+            <span>Más</span>
+          </button>
         </div>
       </nav>
     </div>

@@ -185,11 +185,13 @@ export function CategoryForm({ initialValue, defaultType = 'expense', onSubmit, 
       {submitError ? <p className="rounded-2xl border border-danger/25 bg-danger/10 px-4 py-3 text-sm text-rose-200">{submitError}</p> : null}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-        <Button variant="ghost" fullWidth size="lg" type="button" onClick={onCancel}>
-          Cancelar
-        </Button>
+
         <Button fullWidth size="lg" type="submit" disabled={submitting}>
           {submitting ? 'Guardando...' : initialValue ? 'Actualizar categoria' : 'Crear categoria'}
+        </Button>
+
+        <Button variant="ghost" fullWidth size="lg" type="button" onClick={onCancel} disabled={submitting}>
+          Cancelar
         </Button>
       </div>
     </form>

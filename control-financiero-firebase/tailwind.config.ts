@@ -6,8 +6,8 @@ const config: Config = {
     extend: {
       colors: {
         surface: '#0b111c',
-        accent: '#35d9a5',
-        accentSoft: '#1b9c78',
+        accent: '#b7c6fa',
+        accentSoft: '#8ba2ed',
         ink: '#eef3fb',
         muted: '#94a3b8',
         danger: '#fb7185',

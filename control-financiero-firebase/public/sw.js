@@ -1,58 +1,116 @@
-const CACHE_NAME = 'controlfinanciero-v1';
-const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './pwa-192x192.png', './pwa-512x512.png'];
+/* Replaced during production builds by scripts/generate-sw.mjs. */
+const BUILD_ID = '__BUILD_ID__';
+const PREFIX = 'controlfinanciero-';
+const SHELL_CACHE = PREFIX + 'shell-' + BUILD_ID;
+const ASSETS_CACHE = PREFIX + 'assets-' + BUILD_ID;
+const BASE = self.registration.scope;
+const HOME = new URL('./', BASE).href;
+const INDEX = new URL('index.html', BASE).href;
+const STATIC_PREFIX = new URL('assets/', BASE).pathname;
+
+function isVersionedStaticAsset(url) {
+  return url.pathname.startsWith(STATIC_PREFIX)
+    && /-[A-Za-z0-9_-]{8,}\.(?:js|css|svg|png|webp|woff2?)$/i.test(url.pathname);
+}
+
+function isPublicShellAsset(url) {
+  return [
+    'manifest.webmanifest',
+    'icon.svg',
+    'pwa-192x192.png',
+    'pwa-512x512.png',
+  ].some((filename) => url.href === new URL(filename, BASE).href);
+}
 
 self.addEventListener('install', (event) => {
+  // Deliberately do NOT call skipWaiting here. An active user must choose
+  // when to reload, so editing forms are not discarded by a deployment.
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()),
+    caches.open(SHELL_CACHE).then((cache) => cache.addAll([
+      HOME, INDEX,
+      new URL('manifest.webmanifest', BASE).href,
+      new URL('icon.svg', BASE).href,
+    ])),
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches
-      .keys()
-      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))))
-      .then(() => self.clients.claim()),
-  );
+  event.waitUntil((async () => {
+    const names = await caches.keys();
+    await Promise.all(
+      names.filter((name) =>
+        name.startsWith(PREFIX) && name !== SHELL_CACHE && name !== ASSETS_CACHE,
+      ).map((name) => caches.delete(name)),
+    );
+    await self.clients.claim();
+  })());
 });
 
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') {
-    return;
-  }
+  const request = event.request;
+  if (request.method !== 'GET' || request.cache === 'only-if-cached') return;
 
-  const requestUrl = new URL(event.request.url);
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
 
-  if (requestUrl.origin !== self.location.origin) {
-    return;
-  }
-
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(async () => {
-        const cache = await caches.open(CACHE_NAME);
-        return (await cache.match('./')) || Response.error();
-      }),
-    );
-
-    return;
-  }
-
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
+  // HashRouter navigates only at the app's scope root. Do not intercept or
+  // persist unrelated HTML routes that might contain user-specific data.
+  const shellNavigation = url.pathname === new URL(HOME).pathname
+    || url.pathname === new URL(INDEX).pathname;
+  if (request.mode === 'navigate' && shellNavigation) {
+    // Always try network first for current HTML; offline returns only a
+    // cached app shell, not a promise of offline Firestore persistence.
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(request);
+        if (response.ok && response.type === 'basic' && response.headers.get('content-type')?.includes('text/html')) {
+          const cache = await caches.open(SHELL_CACHE);
+          await cache.put(INDEX, response.clone());
+        }
+        return response;
+      } catch {
+        const cache = await caches.open(SHELL_CACHE);
+        return (await cache.match(INDEX)) || Response.error();
       }
+    })());
+    return;
+  }
 
-      return fetch(event.request)
-        .then((networkResponse) => {
-          const clonedResponse = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, clonedResponse);
-          });
-          return networkResponse;
-        })
-        .catch(() => Response.error());
-    }),
-  );
+  if (isVersionedStaticAsset(url)) {
+    // Fingerprinted files are immutable. Never cache requests to Firebase,
+    // API endpoints, or arbitrary URLs that may return personal information.
+    event.respondWith((async () => {
+      const cache = await caches.open(ASSETS_CACHE);
+      const cached = await cache.match(request);
+      if (cached) return cached;
+      const response = await fetch(request);
+      if (response.ok && response.type === 'basic'
+          && !response.headers.get('content-type')?.includes('text/html')) {
+        await cache.put(request, response.clone());
+      }
+      return response;
+    })());
+    return;
+  }
+
+  if (isPublicShellAsset(url)) {
+    event.respondWith((async () => {
+      const cache = await caches.open(SHELL_CACHE);
+      try {
+        const response = await fetch(request);
+        if (response.ok && response.type === 'basic') {
+          await cache.put(request, response.clone());
+        }
+        return response;
+      } catch {
+        return (await cache.match(request)) || Response.error();
+      }
+    })());
+  }
 });

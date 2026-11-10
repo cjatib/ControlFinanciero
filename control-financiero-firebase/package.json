@@ -5,14 +5,25 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "build": "tsc -b && vite build && node scripts/generate-sw.mjs",
+    "preview": "vite preview",
+    "test:budget": "node --test tests/budget-inheritance.test.mjs",
+    "test:analytics": "node --test tests/financial-analytics.test.mjs",
+    "test": "node --test tests/budget-inheritance.test.mjs tests/financial-analytics.test.mjs tests/historical-report.test.mjs tests/report-export.test.mjs tests/report-pdf.test.mjs tests/pwa.test.mjs tests/hosting-config.test.mjs tests/security-dependencies.test.mjs",
+    "test:reports": "node --test tests/historical-report.test.mjs",
+    "test:export": "node --test tests/report-export.test.mjs",
+    "test:pdf": "node --test tests/report-pdf.test.mjs",
+    "test:pwa": "node --test tests/pwa.test.mjs",
+    "test:pwa-build": "node scripts/verify-sw.mjs",
+    "test:hosting": "node --test tests/hosting-config.test.mjs",
+    "audit:security": "npm audit --audit-level=moderate",
+    "release:check": "node scripts/release-preflight.mjs"
   },
   "dependencies": {
-    "firebase": "^10.12.2",
+    "firebase": "13.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.24.1"
+    "react-router-dom": "^7.18.5"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
@@ -22,7 +33,9 @@
     "postcss": "^8.4.41",
     "tailwindcss": "^3.4.10",
     "typescript": "^5.5.4",
-    "vite": "^5.3.4"
+    "vite": "6.4.5"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "1.14.7"
   }
 }
-

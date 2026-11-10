@@ -103,11 +103,13 @@ export function SavingsPlanForm({ initialValue, onSubmit, onCancel }: SavingsPla
       ) : null}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-        <Button variant="ghost" fullWidth size="lg" type="button" onClick={onCancel}>
-          Cancelar
-        </Button>
+
         <Button fullWidth size="lg" type="submit" disabled={submitting}>
           {submitting ? 'Guardando...' : initialValue ? 'Actualizar plan' : 'Crear plan'}
+        </Button>
+
+        <Button variant="ghost" fullWidth size="lg" type="button" onClick={onCancel} disabled={submitting}>
+          Cancelar
         </Button>
       </div>
     </form>
