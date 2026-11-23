@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
 import { formatCurrency } from '@/lib/format';
 import type { BudgetGroupProgress } from '@/services/budget/budgetMath';
+import { summarizeSavingsGoals } from '@/services/dashboard/savingsGoalSummary';
 
 interface BudgetDistributionSummaryProps {
   currency: 'CLP';
@@ -24,10 +25,7 @@ export function BudgetDistributionSummary({
   progress,
   sourceMonth,
 }: BudgetDistributionSummaryProps) {
-  const savings = progress.filter((item) => item.group.kind === 'saving');
-  const savingAssigned = savings.reduce((sum, item) => sum + item.assigned, 0);
-  const savingActual = savings.reduce((sum, item) => sum + item.actual, 0);
-  const savingPercentage = savings.reduce((sum, item) => sum + item.group.percentage, 0);
+  const savings = summarizeSavingsGoals(progress);
 
   return (
     <Card className="space-y-4 p-4 sm:p-5">
@@ -121,12 +119,12 @@ export function BudgetDistributionSummary({
         })}
       </div>
 
-      {savings.length > 0 ? (
+      {savings.count > 0 ? (
         <div className="rounded-xl bg-white/[0.04] px-3 py-3 text-xs leading-5 text-slate-300">
           <p className="font-bold text-slate-100">¿Cómo se calcula el ahorro?</p>
           <p className="mt-1">
-            Reservaste {percent(savingPercentage)} del sueldo ({formatCurrency(savingAssigned, currency)})
-            para tus metas. Aportes realmente registrados en los planes vinculados: {formatCurrency(savingActual, currency)}.
+            Reservaste {percent(savings.percentage)} del sueldo ({formatCurrency(savings.assigned, currency)})
+            para tus metas. Aportes realmente registrados en los planes vinculados: {formatCurrency(savings.actual, currency)}.
           </p>
           <p className="mt-1 text-slate-400">
             Es un objetivo, no dinero ya ahorrado. Solo se registra avance al ingresar aportes en
