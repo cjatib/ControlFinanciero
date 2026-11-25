@@ -94,7 +94,7 @@ export function CompactMovementList({
                       onClick={() => setExpandedId(expanded ? null : transaction.id)}
                       aria-label={'Opciones del movimiento ' + title}
                       aria-expanded={expanded}
-                      aria-controls={actionPanelId}
+                      aria-controls={expanded ? actionPanelId : undefined}
                       title="Editar o eliminar"
                     >
                       <OptionsIcon />
@@ -111,6 +111,7 @@ export function CompactMovementList({
                       setExpandedId(null);
                       onEdit?.(transaction);
                     }}
+                    aria-label={'Editar movimiento ' + title}
                     className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-accent/20 bg-accent/10 px-3 text-xs font-semibold text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
                   >
                     <EditIcon className="h-4 w-4" />
@@ -122,6 +123,7 @@ export function CompactMovementList({
                       setExpandedId(null);
                       void onDelete?.(transaction);
                     }}
+                    aria-label={'Eliminar movimiento ' + title}
                     className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-rose-300/20 bg-rose-300/10 px-3 text-xs font-semibold text-rose-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-300"
                   >
                     <TrashIcon className="h-4 w-4" />
