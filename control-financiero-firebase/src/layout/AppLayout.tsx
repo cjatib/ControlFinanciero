@@ -112,16 +112,26 @@ export function AppLayout() {
   const location = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
   const isSecondary = SECONDARY_NAV_ITEMS.some((item) => location.pathname.startsWith(item.to));
+  const onTransactionsScreen = location.pathname === '/transactions';
 
   useEffect(() => {
     setMoreOpen(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+    if (!moreOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMoreOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [moreOpen]);
+
   return (
     <div className="relative min-h-[100dvh] overflow-x-hidden">
       <div className="pointer-events-none absolute inset-0 bg-noise opacity-90" />
       <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-4 pt-5 sm:max-w-6xl sm:px-6 lg:px-8"
-        style={{ paddingBottom: 'calc(8rem + env(safe-area-inset-bottom))' }}>
+        style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}>
         <main className="flex-1 space-y-6 pt-2">
           <PwaUpdateBanner />
           <InstallPromptBanner />
@@ -129,23 +139,25 @@ export function AppLayout() {
         </main>
       </div>
 
-      <Link
-        to="/transactions?create=1"
-        className="fixed right-5 z-30 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-slate-950 shadow-[0_12px_30px_rgba(183,198,250,0.28)] transition hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/50 sm:right-8"
-        style={{ bottom: 'calc(6.2rem + env(safe-area-inset-bottom))' }}
-        aria-label="Registrar nuevo movimiento"
-      >
-        <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" stroke="currentColor" strokeWidth="2.3" aria-hidden="true">
-          <path d="M12 5v14M5 12h14" strokeLinecap="round" />
-        </svg>
-      </Link>
+      {!onTransactionsScreen && !moreOpen ? (
+        <Link
+          to="/transactions?create=1"
+          className="fixed right-4 z-30 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-slate-950 shadow-[0_10px_24px_rgba(183,198,250,0.26)] transition hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/50 sm:right-8 sm:h-14 sm:w-14"
+          style={{ bottom: 'calc(5.7rem + env(safe-area-inset-bottom))' }}
+          aria-label="Registrar nuevo movimiento"
+        >
+          <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" stroke="currentColor" strokeWidth="2.3" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+          </svg>
+        </Link>
+      ) : null}
 
       {moreOpen ? (
         <>
           <button type="button" className="fixed inset-0 z-30 bg-slate-950/50" aria-label="Cerrar menú Más"
             onClick={() => setMoreOpen(false)} />
           <div className="fixed inset-x-4 z-40 mx-auto max-w-md rounded-3xl border border-white/10 bg-[#232630] p-3 shadow-2xl sm:max-w-lg"
-            style={{ bottom: 'calc(6.8rem + env(safe-area-inset-bottom))' }} role="menu" aria-label="Más secciones">
+            style={{ bottom: 'calc(5.6rem + env(safe-area-inset-bottom))' }} role="menu" aria-label="Más secciones">
             <p className="px-3 py-2 text-xs font-semibold uppercase tracking-widest text-slate-400">Más secciones</p>
             <div className="grid grid-cols-1 gap-1">
               {SECONDARY_NAV_ITEMS.map((item) => {
@@ -166,15 +178,15 @@ export function AppLayout() {
         </>
       ) : null}
 
-      <nav className="fixed inset-x-0 z-40 px-3 sm:px-6" style={{ bottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
+      <nav className="fixed inset-x-0 z-40 px-2.5 sm:px-6" style={{ bottom: 'calc(0.4rem + env(safe-area-inset-bottom))' }}
         aria-label="Navegación principal">
-        <div className="mx-auto grid max-w-md grid-cols-5 items-center gap-1 rounded-[1.6rem] border border-white/10 bg-[#242630]/95 p-2 shadow-glow backdrop-blur-xl sm:max-w-3xl">
+        <div className="mx-auto grid max-w-md grid-cols-5 items-stretch gap-0.5 rounded-[1.45rem] border border-white/10 bg-[#242630]/95 p-1.5 shadow-glow backdrop-blur-xl sm:max-w-2xl">
           {MAIN_NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             return (
               <NavLink key={item.to} to={item.to}
                 className={({ isActive }) => cn(
-                  'flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2.5 text-[10px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                  'flex min-h-[56px] min-w-0 flex-col items-center justify-center gap-0.5 rounded-[1.1rem] px-0.5 py-1 text-[10px] font-semibold leading-tight transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent sm:min-h-[60px] sm:text-xs',
                   isActive ? 'bg-accent text-slate-950' : 'text-slate-300 hover:bg-white/10',
                 )}>
                 <Icon />
@@ -184,7 +196,7 @@ export function AppLayout() {
           })}
           <button type="button" onClick={() => setMoreOpen((v) => !v)} aria-expanded={moreOpen}
             aria-haspopup="menu" aria-label="Más secciones"
-            className={cn('flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2.5 text-[10px] font-semibold transition',
+            className={cn('flex min-h-[56px] min-w-0 flex-col items-center justify-center gap-0.5 rounded-[1.1rem] px-0.5 py-1 text-[10px] font-semibold leading-tight transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent sm:min-h-[60px] sm:text-xs',
               moreOpen || isSecondary ? 'bg-accent text-slate-950' : 'text-slate-300 hover:bg-white/10')}>
             <MoreIcon />
             <span>Más</span>
