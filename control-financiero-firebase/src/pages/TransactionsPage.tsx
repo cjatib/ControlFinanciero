@@ -6,7 +6,6 @@ import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Loader } from '@/components/ui/Loader';
 import { Modal } from '@/components/ui/Modal';
-import { PageHeader } from '@/components/ui/PageHeader';
 import { TransactionForm } from '@/forms/TransactionForm';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
@@ -79,12 +78,27 @@ export function TransactionsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow="Transacciones"
-        title="Registra ingresos y gastos"
-        description="Mantén tu flujo actualizado con transacciones editables, seguras y asociadas a tus categorias."
-        action={<div className="hidden sm:block"><Button onClick={() => setModalOpen(true)}>Nueva transacción</Button></div>}
-      />
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent/80">Actividad financiera</p>
+          <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">Movimientos</h1>
+          <p className="mt-1 text-xs leading-5 text-slate-400">Consulta y gestiona tus ingresos y gastos.</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setSelectedTransaction(null);
+            setModalOpen(true);
+          }}
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-slate-950 shadow-sm transition hover:bg-[#c9d4ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          aria-label="Registrar nuevo movimiento"
+        >
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+          </svg>
+          Nuevo
+        </button>
+      </header>
 
       {error ? <Card className="p-5 text-sm text-rose-200">{error}</Card> : null}
 
