@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { CompactMovementList } from '@/components/dashboard/CompactMovementList';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -72,10 +73,22 @@ export function HistoryPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent/80">Tu actividad</p>
-        <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">Historial</h1>
-        <p className="mt-1 text-xs leading-5 text-slate-400">Encuentra movimientos por fecha, tipo o categoría.</p>
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent/80">Tu actividad</p>
+          <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">Historial</h1>
+          <p className="mt-1 text-xs leading-5 text-slate-400">Encuentra movimientos por fecha, tipo o categoría.</p>
+        </div>
+        <Link
+          to="/transactions?create=1"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-slate-950 transition hover:bg-[#c9d4ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          aria-label="Registrar nuevo movimiento"
+        >
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+          </svg>
+          Nuevo
+        </Link>
       </header>
 
       <Card className="p-3.5 sm:p-5">
