@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { TransactionListItem } from '@/components/TransactionListItem';
+import { CompactMovementList } from '@/components/dashboard/CompactMovementList';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -89,21 +89,17 @@ export function TransactionsPage() {
       {error ? <Card className="p-5 text-sm text-rose-200">{error}</Card> : null}
 
       {transactions.length > 0 ? (
-        <div className="space-y-3">
-          {transactions.map((transaction) => (
-            <TransactionListItem
-              key={transaction.id}
-              transaction={transaction}
-              currency={profile?.currency ?? 'CLP'}
-              showActions
-              onEdit={(currentTransaction) => {
-                setSelectedTransaction(currentTransaction);
-                setModalOpen(true);
-              }}
-              onDelete={handleDelete}
-            />
-          ))}
-        </div>
+        <CompactMovementList
+          transactions={transactions}
+          categories={categories}
+          currency={profile?.currency ?? 'CLP'}
+          showActions
+          onEdit={(currentTransaction) => {
+            setSelectedTransaction(currentTransaction);
+            setModalOpen(true);
+          }}
+          onDelete={handleDelete}
+        />
       ) : (
         <EmptyState
           title="Aun no registras transacciones"
