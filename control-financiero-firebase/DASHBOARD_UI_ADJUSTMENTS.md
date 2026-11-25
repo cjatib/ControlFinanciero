@@ -42,3 +42,21 @@ Los nuevos tests en `tests/dashboard-savings.test.mjs` comprueban que el objetiv
 - La barra de navegación inferior se hizo más compacta, mantiene sus cinco destinos principales y usa `env(safe-area-inset-bottom)` para respetar el área inferior del iPhone. El menú **Más** se reposicionó y ahora se puede cerrar con Escape.
 - El atajo flotante para crear un movimiento continúa disponible en las demás pantallas y se oculta cuando está desplegado el menú Más.
 - **Pendiente** validar físicamente en Safari iPhone la vista previa actualizada antes de fusionar el PR #2 o publicar Hosting live.
+
+## Historial y Categorías — 25/11/2026
+
+- **Historial:** título y descripción compactos; búsqueda y mes siempre visibles, filtros de **Tipo** y **Categoría** plegables. Un indicador identifica filtros avanzados activos; **Todos los meses** y **Restablecer** evitan desplazamientos innecesarios. Conserva las reglas de filtrado y los totales, que se muestran en dos columnas en móvil con la aclaración de que corresponden a los resultados filtrados.
+- **Historial:** la lista usa el mismo `CompactMovementList` que Dashboard/Movimientos. El menú `···` conserva edición y eliminación con el `ConfirmDialog` anterior. Se muestra el número de resultados.
+- **Categorías:** encabezado breve y botón **Nueva** integrado, pestañas **Gastos/Ingresos** con número de categorías, lista continua con icono y color personalizado y acciones `···` expandibles. Las funciones para crear/editar/eliminar conservan su formulario y diálogo de confirmación.
+- **Navegación:** el botón flotante `+` se oculta en las pantallas del menú **Más** (Historial, Categorías, Reportes, Créditos y Ajustes); permanece en Inicio, Plan y Ahorro. En Movimientos el alta sigue en el encabezado.
+- **Sin cambios en Firestore, Auth, reglas, colecciones, totales ni formato de documentos**. El canal live no debe modificarse antes de verificar el preview del PR #2.
+
+### Pruebas manuales de aceptación
+
+1. Historial en iPhone: buscar por categoría/descripcion/monto, elegir otro mes, elegir **Todos los meses**, filtrar por tipo y categoría y **Restablecer**. Los importes y el contador de movimientos deben cambiar coherentemente.
+2. Historial: desplegar `···` en un movimiento, comprobar apertura de la edición correcta, cerrar sin cambios; probar que Eliminar muestra el diálogo y **cancelarlo**.
+3. Categorías: cambiar entre Gastos e Ingresos, verificar contadores y colores/iconos; abrir `···`, editar sin guardar y cancelar la confirmación de eliminación.
+4. Verificar que se puede llegar hasta la última fila de cada lista sin bloqueo de la navegación inferior, y que no hay botón flotante `+` tapando contenido en Historial o Categorías.
+5. Repetir en Chrome escritorio, comprobando que los formularios y filtros no rompen la distribución en ancho grande.
+
+Las nuevas pruebas automatizadas `tests/history-filters.test.mjs` protegen la búsqueda, mes, categoría y los totales derivados de los resultados filtrados.
