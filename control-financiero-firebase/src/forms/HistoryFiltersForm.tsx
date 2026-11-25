@@ -48,7 +48,7 @@ export function HistoryFiltersForm({ filters, categories, onChange, onClear }: H
             (expanded || extraFilterCount ? 'bg-accent/15 text-accent' : 'bg-white/5 text-slate-200 hover:bg-white/10')}
           onClick={() => setExpanded((current) => !current)}
           aria-expanded={expanded}
-          aria-controls={detailsId}
+          aria-controls={expanded ? detailsId : undefined}
         >
           <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
             <path d="M4 7h16M7 12h10M10 17h4" strokeLinecap="round" />
