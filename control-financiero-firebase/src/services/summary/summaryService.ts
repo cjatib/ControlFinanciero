@@ -1,4 +1,4 @@
-import { toDate } from '@/lib/format';
+import { toDate } from '../../lib/format.ts';
 import type { SummarySnapshot } from '@/types/summary';
 import type { Transaction, TransactionFilters } from '@/types/transaction';
 
