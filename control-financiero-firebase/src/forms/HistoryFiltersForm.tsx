@@ -1,6 +1,7 @@
 import { useId, useState } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
+import { getCurrentMonthValue } from '@/services/summary/summaryService';
 import type { Category } from '@/types/category';
 import type { TransactionFilters } from '@/types/transaction';
 
@@ -17,7 +18,7 @@ export function HistoryFiltersForm({ filters, categories, onChange, onClear }: H
   const availableCategories =
     filters.type === 'all' ? categories : categories.filter((category) => category.type === filters.type);
   const extraFilterCount = Number(filters.type !== 'all') + Number(filters.categoryId !== 'all');
-  const hasChanges = Boolean(filters.search.trim()) || extraFilterCount > 0 || filters.month === '';
+  const hasChanges = Boolean(filters.search.trim()) || extraFilterCount > 0 || filters.month !== getCurrentMonthValue();
 
   return (
     <div className="space-y-3">
