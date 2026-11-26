@@ -66,3 +66,25 @@ test('category choices remain scrollable within the mobile modal', async () => {
   const modal = await source('components/ui/Modal.tsx');
   assert.match(modal, /querySelector\('\[data-combobox-expanded="true"\]'\)/);
 });
+
+test('all four primary creation forms open centered on iPhone', async () => {
+  const cases = [
+    ['pages/TransactionsPage.tsx', 'description="Registra el monto, la categoría y la fecha."'],
+    ['pages/CategoriesPage.tsx', 'description="Asigna un nombre y personaliza su apariencia."'],
+    ['pages/CreditsPage.tsx', 'description="Indica el monto, las cuotas y el primer vencimiento."'],
+    ['pages/SavingsPage.tsx', 'description="Establece el nombre y la meta mensual."'],
+  ];
+  for (const [file, description] of cases) {
+    const page = await source(file);
+    const start = page.indexOf(description);
+    assert.ok(start >= 0, file + ' missing creation modal description');
+    const tagEnd = page.indexOf('\n      >', start);
+    assert.ok(tagEnd > start, file + ' missing modal opening tag');
+    const props = page.slice(start, tagEnd);
+    assert.match(props, /\n\s+centered(?:\n|\s)/, file + ' creation form must be vertically centered');
+  }
+  const modal = await source('components/ui/Modal.tsx');
+  assert.match(modal, /centered \? 'items-center/);
+  assert.match(modal, /maxHeight: 'calc\(100dvh/);
+  assert.match(modal, /overflow-y-auto overscroll-contain/);
+});
