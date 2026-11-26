@@ -81,7 +81,7 @@ test('all four primary creation forms open centered on iPhone', async () => {
     const tagEnd = page.indexOf('\n      >', start);
     assert.ok(tagEnd > start, file + ' missing modal opening tag');
     const props = page.slice(start, tagEnd);
-    assert.match(props, /\n\s+centered(?:\n|\s)/, file + ' creation form must be vertically centered');
+    assert.match(props, /\n\s+centered(?:\s|$)/, file + ' creation form must be vertically centered');
   }
   const modal = await source('components/ui/Modal.tsx');
   assert.match(modal, /centered \? 'items-center/);
