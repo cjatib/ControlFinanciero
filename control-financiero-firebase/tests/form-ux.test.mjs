@@ -62,4 +62,7 @@ test('category choices remain scrollable within the mobile modal', async () => {
   assert.match(combobox, /className="relative z-30/);
   assert.match(combobox, /sm:absolute/);
   assert.match(combobox, /max-h-48 overflow-y-auto/);
+  assert.match(combobox, /data-combobox-expanded/);
+  const modal = await source('components/ui/Modal.tsx');
+  assert.match(modal, /querySelector\('\[data-combobox-expanded="true"\]'\)/);
 });
