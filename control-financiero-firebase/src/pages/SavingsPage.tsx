@@ -7,8 +7,6 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Loader } from '@/components/ui/Loader';
 import { Modal } from '@/components/ui/Modal';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { StatCard } from '@/components/ui/StatCard';
 import { SavingsEntryForm } from '@/forms/SavingsEntryForm';
 import { SavingsPlanForm } from '@/forms/SavingsPlanForm';
 import { useAuth } from '@/hooks/useAuth';
@@ -35,6 +33,7 @@ export function SavingsPage() {
   const { user, profile } = useAuth();
   const { plans, loading, error } = useSavingsPlans();
   const [planModalOpen, setPlanModalOpen] = useState(false);
+  const [expandedPlanActions, setExpandedPlanActions] = useState<string | null>(null);
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [entryModalOpen, setEntryModalOpen] = useState(false);
@@ -155,64 +154,90 @@ export function SavingsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow="Ahorro"
-        title="Construye tus planes de ahorro"
-        description="Define cuanto ahorraras cada mes, registra cada ingreso y sigue el total acumulado por motivo."
-        action={<Button onClick={openCreatePlan}>Nuevo plan</Button>}
-      />
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent/80">Tus objetivos</p>
+          <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">Ahorro</h1>
+          <p className="mt-1 text-xs leading-5 text-slate-400">Organiza tus metas y registra aportes reales.</p>
+        </div>
+        <button
+          type="button" onClick={openCreatePlan}
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-slate-950 transition hover:bg-[#c9d4ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+          </svg>
+          Nuevo plan
+        </button>
+      </header>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard
-          label="Planes activos"
-          value={`${savingsSummary.totalPlans}`}
-          helper="Motivos"
-        />
-        <StatCard
-          label="Meta mensual total"
-          value={formatCurrency(savingsSummary.totalMonthlyTarget, profile?.currency ?? 'CLP')}
-        />
-        <StatCard
-          label="Total ahorrado"
-          value={formatCurrency(savingsSummary.totalSaved, profile?.currency ?? 'CLP')}
-          tone="positive"
-        />
-      </div>
+      <Card className="grid grid-cols-2 gap-2 p-3.5 sm:gap-4 sm:p-5" aria-label="Resumen de tus ahorros">
+        <div className="min-w-0 border-r border-white/10 pr-2">
+          <p className="text-xs text-slate-400">Meta mensual total</p>
+          <p className="mt-1 break-words text-base font-extrabold tabular-nums text-slate-100 sm:text-xl">
+            {formatCurrency(savingsSummary.totalMonthlyTarget, profile?.currency ?? 'CLP')}
+          </p>
+        </div>
+        <div className="min-w-0 pl-1">
+          <p className="text-xs text-slate-400">Total acumulado</p>
+          <p className="mt-1 break-words text-base font-extrabold tabular-nums text-emerald-300 sm:text-xl">
+            {formatCurrency(savingsSummary.totalSaved, profile?.currency ?? 'CLP')}
+          </p>
+        </div>
+        <p className="col-span-2 text-[11px] text-slate-400">
+          {savingsSummary.totalPlans} {savingsSummary.totalPlans === 1 ? 'plan' : 'planes'} · La meta es mensual y el acumulado corresponde a aportes registrados.
+        </p>
+      </Card>
 
       {error ? <Card className="p-5 text-sm text-rose-200">{error}</Card> : null}
 
       {plans.length > 0 ? (
-        <div className="space-y-4">
-          {plans.map((plan) => (
-            <SavingsPlanCard
-              key={plan.id}
-              plan={plan}
-              currency={profile?.currency ?? 'CLP'}
-              onOpenDetails={(currentPlan) => setSelectedPlanId(currentPlan.id)}
-              onEdit={(currentPlan) => {
-                setEditingPlanId(currentPlan.id);
-                setPlanModalOpen(true);
-              }}
-              onDelete={(currentPlan) => setPlanPendingDelete(currentPlan)}
-            />
-          ))}
-        </div>
+        <section className="space-y-3" aria-label="Planes de ahorro">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-bold text-ink">Mis planes</h2>
+            <span className="rounded-full bg-white/5 px-2.5 py-1 text-xs font-semibold text-slate-300">
+              {plans.length}
+            </span>
+          </div>
+          <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#1d2027] shadow-glow">
+            <ul className="divide-y divide-white/10">
+              {plans.map((plan) => (
+                <SavingsPlanCard
+                  key={plan.id}
+                  plan={plan}
+                  currency={profile?.currency ?? 'CLP'}
+                  expanded={expandedPlanActions === plan.id}
+                  onToggleActions={() => setExpandedPlanActions((current) => current === plan.id ? null : plan.id)}
+                  onOpenDetails={(currentPlan) => {
+                    setExpandedPlanActions(null);
+                    setSelectedPlanId(currentPlan.id);
+                  }}
+                  onEdit={(currentPlan) => {
+                    setExpandedPlanActions(null);
+                    setEditingPlanId(currentPlan.id);
+                    setPlanModalOpen(true);
+                  }}
+                  onDelete={(currentPlan) => {
+                    setExpandedPlanActions(null);
+                    setPlanPendingDelete(currentPlan);
+                  }}
+                />
+              ))}
+            </ul>
+          </div>
+        </section>
       ) : (
         <EmptyState
-          title="Aun no registras planes de ahorro"
-          description="Crea tu primer motivo de ahorro y empieza a registrar cada ingreso para seguir tu avance."
-          action={
-            <Button size="lg" onClick={openCreatePlan}>
-              Crear mi primer plan
-            </Button>
-          }
+          title="Aún no registras planes de ahorro"
+          description="Crea tu primer objetivo para comenzar a registrar aportes."
+          action={<Button size="lg" onClick={openCreatePlan}>Crear mi primer plan</Button>}
         />
       )}
 
       <Modal
         open={planModalOpen}
         title={editingPlan ? 'Editar plan de ahorro' : 'Nuevo plan de ahorro'}
-        description="Define el motivo y el monto que quieres ahorrar mes a mes."
+        description="Establece el nombre y la meta mensual."
         onClose={closePlanModal}
         centered
       >
@@ -231,29 +256,29 @@ export function SavingsPage() {
       >
         {selectedPlan ? (
           <div className="space-y-5">
-            <Card className="space-y-4 p-5">
-              <div className="grid gap-4 sm:grid-cols-2">
+            <Card className="space-y-4 p-3.5 sm:p-5">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-sm text-slate-400">Monto mensual</p>
-                  <p className="mt-2 text-lg font-bold text-ink">
+                  <p className="mt-1 break-words text-sm font-bold text-ink sm:text-lg">
                     {formatCurrency(selectedPlan.monthlyTarget, profile?.currency ?? 'CLP')}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-400">Total ahorrado</p>
-                  <p className="mt-2 text-lg font-bold text-accent">
+                  <p className="mt-1 break-words text-sm font-bold text-accent sm:text-lg">
                     {formatCurrency(selectedPlan.savedAmount, profile?.currency ?? 'CLP')}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-400">Ahorrado este mes</p>
-                  <p className="mt-2 text-lg font-bold text-ink">
+                  <p className="mt-1 break-words text-sm font-bold text-ink sm:text-lg">
                     {formatCurrency(currentMonthSaved, profile?.currency ?? 'CLP')}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-400">Ultimo ingreso</p>
-                  <p className="mt-2 text-lg font-bold text-ink">{lastEntry ? formatDate(lastEntry.entryDate) : 'Sin ingresos'}</p>
+                  <p className="mt-1 break-words text-sm font-bold text-ink sm:text-lg">{lastEntry ? formatDate(lastEntry.entryDate) : 'Sin ingresos'}</p>
                 </div>
               </div>
 
@@ -288,7 +313,7 @@ export function SavingsPage() {
             {entriesLoading ? (
               <Loader label="Cargando ingresos de ahorro..." />
             ) : entries.length > 0 ? (
-              <div className="space-y-3">
+              <div className="divide-y divide-white/10 rounded-2xl border border-white/10 bg-white/[0.035] px-3 py-1">
                 {entries.map((entry) => (
                   <SavingsEntryListItem
                     key={entry.id}
@@ -325,7 +350,7 @@ export function SavingsPage() {
       <Modal
         open={entryModalOpen && Boolean(selectedPlan)}
         title={selectedEntry ? 'Editar ingreso de ahorro' : 'Registrar ingreso de ahorro'}
-        description="Guarda el monto ahorrado y la fecha en que lo ingresaste."
+        description="Anota cuánto ahorraste y cuándo."
         onClose={closeEntryModal}
       >
         <SavingsEntryForm initialValue={selectedEntry} onSubmit={handleSaveEntry} onCancel={closeEntryModal} />

@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Button } from '@/components/ui/Button';
+import { FormActions } from '@/components/ui/FormActions';
+import { OptionalDetails } from '@/components/ui/OptionalDetails';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
@@ -114,12 +115,12 @@ export function TransactionForm({ categories, initialValue, onSubmit, onCancel, 
   }
 
   return (
-    <form id={formId} className="space-y-5" onSubmit={handleSubmit}>
+    <form id={formId} className="space-y-3.5" onSubmit={handleSubmit}>
       <div className="grid grid-cols-2 gap-2" role="group" aria-label="Tipo de movimiento">
         {(['expense', 'income'] as const).map((type) => (
           <button key={type} type="button" aria-pressed={formState.type === type}
             onClick={() => setFormState((current) => ({ ...current, type, categoryId: '' }))}
-            className={'h-12 rounded-2xl border text-sm font-semibold transition ' +
+            className={'min-h-11 rounded-xl border text-sm font-semibold transition ' +
               (formState.type === type ? 'border-accent bg-accent text-slate-950' : 'border-white/10 bg-white/5 text-slate-200')}>
             {type === 'expense' ? 'Gasto' : 'Ingreso'}
           </button>
@@ -128,7 +129,8 @@ export function TransactionForm({ categories, initialValue, onSubmit, onCancel, 
 
       <Input
         id="transaction-amount"
-        label="Monto"
+        label="Monto (CLP)"
+        className="font-semibold tabular-nums"
         type="number"
         inputMode="numeric"
         min="0"
@@ -141,7 +143,7 @@ export function TransactionForm({ categories, initialValue, onSubmit, onCancel, 
 
       <Select
         id="transaction-category"
-        label="Categoria"
+        label="Categoría"
         value={formState.categoryId}
         error={errors.categoryId}
         disabled={filteredCategories.length === 0}
@@ -164,13 +166,16 @@ export function TransactionForm({ categories, initialValue, onSubmit, onCancel, 
         onChange={(event) => setFormState((current) => ({ ...current, transactionDate: event.target.value }))}
       />
 
-      <Textarea
-        id="transaction-description"
-        label="Descripcion"
-        placeholder="Opcional. Agrega un detalle que te ayude a recordarlo."
-        value={formState.description}
-        onChange={(event) => setFormState((current) => ({ ...current, description: event.target.value }))}
-      />
+      <OptionalDetails defaultOpen={Boolean(initialValue?.description?.trim())} label="Agregar descripción (opcional)">
+        <Textarea
+          id="transaction-description"
+          label="Descripción"
+          rows={2}
+          placeholder="Ej. Compra del supermercado"
+          value={formState.description}
+          onChange={(event) => setFormState((current) => ({ ...current, description: event.target.value }))}
+        />
+      </OptionalDetails>
 
       {submitError ? <p className="rounded-2xl border border-danger/25 bg-danger/10 px-4 py-3 text-sm text-rose-200">{submitError}</p> : null}
 
@@ -181,12 +186,12 @@ export function TransactionForm({ categories, initialValue, onSubmit, onCancel, 
       ) : null}
 
       {!hideActions ? (
-        <div className="flex flex-col gap-2">
-          <Button fullWidth size="lg" type="submit" disabled={submitting || filteredCategories.length === 0}>
-            {submitting ? 'Guardando...' : initialValue ? 'Guardar cambios' : 'Guardar movimiento'}
-          </Button>
-          <Button variant="ghost" fullWidth size="lg" type="button" onClick={onCancel}>Cancelar</Button>
-        </div>
+        <FormActions
+          submitLabel={initialValue ? 'Guardar cambios' : 'Guardar movimiento'}
+          submitting={submitting}
+          disabled={filteredCategories.length === 0}
+          onCancel={onCancel}
+        />
       ) : null}
     </form>
   );

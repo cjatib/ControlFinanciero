@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Button } from '@/components/ui/Button';
+import { FormActions } from '@/components/ui/FormActions';
+import { OptionalDetails } from '@/components/ui/OptionalDetails';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { formatCurrency } from '@/lib/format';
@@ -94,13 +95,13 @@ export function CreditInstallmentForm({
   }
 
   return (
-    <form className="space-y-5" onSubmit={handleSubmit}>
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Resumen actual</p>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+    <form className="space-y-3.5" onSubmit={handleSubmit}>
+      <div className="rounded-xl border border-white/10 bg-white/[0.035] p-3">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Resumen actual</p>
+        <div className="mt-2 grid grid-cols-2 gap-2">
           <div>
             <p className="text-sm text-slate-400">Saldo pendiente</p>
-            <p className="mt-1 text-lg font-bold text-ink">{formatCurrency(remainingAmount, currency)}</p>
+            <p className="mt-1 break-words text-sm font-bold text-ink sm:text-lg">{formatCurrency(remainingAmount, currency)}</p>
           </div>
           <div>
             <p className="text-sm text-slate-400">Cuotas restantes</p>
@@ -111,7 +112,8 @@ export function CreditInstallmentForm({
 
       <Input
         id="credit-installment-amount"
-        label="Monto de la cuota"
+        label="Monto de la cuota (CLP)"
+        className="font-semibold tabular-nums"
         type="number"
         inputMode="numeric"
         min="0"
@@ -131,13 +133,16 @@ export function CreditInstallmentForm({
         onChange={(event) => setFormState((current) => ({ ...current, paymentDate: event.target.value }))}
       />
 
-      <Textarea
-        id="credit-installment-description"
-        label="Nota"
-        placeholder="Opcional. Ej. abono extra, pago desde cuenta sueldo, refinanciamiento."
-        value={formState.description}
-        onChange={(event) => setFormState((current) => ({ ...current, description: event.target.value }))}
-      />
+      <OptionalDetails defaultOpen={Boolean(initialValue?.description?.trim())}>
+        <Textarea
+          id="credit-installment-description"
+          label="Nota"
+          rows={2}
+          placeholder="Ej. Abono extra"
+          value={formState.description}
+          onChange={(event) => setFormState((current) => ({ ...current, description: event.target.value }))}
+        />
+      </OptionalDetails>
 
       {!initialValue && remainingInstallments <= 0 ? (
         <p className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
@@ -152,19 +157,12 @@ export function CreditInstallmentForm({
         </p>
       ) : null}
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-        <Button
-          fullWidth
-          size="lg"
-          type="submit"
-          disabled={submitting || (!initialValue && remainingInstallments <= 0)}
-        >
-          {submitting ? 'Guardando...' : initialValue ? 'Actualizar cuota' : 'Registrar cuota'}
-        </Button>
-        <Button variant="ghost" fullWidth size="lg" type="button" onClick={onCancel} disabled={submitting}>
-          Cancelar
-        </Button>
-      </div>
+      <FormActions
+        submitLabel={initialValue ? 'Guardar cambios' : 'Registrar cuota'}
+        submitting={submitting}
+        disabled={!initialValue && remainingInstallments <= 0}
+        onCancel={onCancel}
+      />
     </form>
   );
 }

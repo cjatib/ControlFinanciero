@@ -7,8 +7,6 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Loader } from '@/components/ui/Loader';
 import { Modal } from '@/components/ui/Modal';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { StatCard } from '@/components/ui/StatCard';
 import { CreditForm } from '@/forms/CreditForm';
 import { CreditInstallmentForm } from '@/forms/CreditInstallmentForm';
 import { useAuth } from '@/hooks/useAuth';
@@ -41,6 +39,7 @@ export function CreditsPage() {
   const { user, profile } = useAuth();
   const { credits, loading, error } = useCredits();
   const [creditModalOpen, setCreditModalOpen] = useState(false);
+  const [expandedCreditActions, setExpandedCreditActions] = useState<string | null>(null);
   const [editingCreditId, setEditingCreditId] = useState<string | null>(null);
   const [selectedCreditId, setSelectedCreditId] = useState<string | null>(null);
   const [installmentModalOpen, setInstallmentModalOpen] = useState(false);
@@ -184,76 +183,89 @@ export function CreditsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow="Creditos"
-        title="Controla cuotas y saldo pendiente"
-        description="Registra varios creditos, guarda cada cuota pagada y sigue el avance con el proximo vencimiento calculado automaticamente."
-        action={<Button onClick={openCreateCredit}>Nuevo credito</Button>}
-      />
-
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard
-          label="Creditos activos"
-          value={`${creditsSummary.activeCredits}`}
-          helper="Pendientes"
-        />
-        <StatCard
-          label="Saldo pendiente"
-          value={formatCurrency(creditsSummary.totalPending, profile?.currency ?? 'CLP')}
-          tone="negative"
-        />
-        <StatCard
-          label="Total abonado"
-          value={formatCurrency(creditsSummary.totalPaid, profile?.currency ?? 'CLP')}
-          tone="positive"
-        />
-      </div>
-
-      <Card className="grid gap-4 p-5 sm:grid-cols-2">
-        <div>
-          <p className="text-sm text-slate-400">Cuotas pendientes</p>
-          <p className="mt-2 text-2xl font-bold text-ink">{creditsSummary.remainingInstallments}</p>
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent/80">Tus compromisos</p>
+          <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">Créditos</h1>
+          <p className="mt-1 text-xs leading-5 text-slate-400">Revisa saldos, cuotas y próximos vencimientos.</p>
         </div>
-        <div>
-          <p className="text-sm text-slate-400">Cuotas totales registradas</p>
-          <p className="mt-2 text-2xl font-bold text-ink">{creditsSummary.totalInstallments}</p>
+        <button
+          type="button" onClick={openCreateCredit}
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-slate-950 transition hover:bg-[#c9d4ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+          </svg>
+          Nuevo
+        </button>
+      </header>
+
+      <Card className="grid grid-cols-2 gap-2 p-3.5 sm:gap-4 sm:p-5" aria-label="Resumen de créditos">
+        <div className="min-w-0 border-r border-white/10 pr-2">
+          <p className="text-xs text-slate-400">Saldo pendiente</p>
+          <p className="mt-1 break-words text-base font-extrabold tabular-nums text-rose-300 sm:text-xl">
+            {formatCurrency(creditsSummary.totalPending, profile?.currency ?? 'CLP')}
+          </p>
         </div>
+        <div className="min-w-0 pl-1">
+          <p className="text-xs text-slate-400">Total abonado</p>
+          <p className="mt-1 break-words text-base font-extrabold tabular-nums text-emerald-300 sm:text-xl">
+            {formatCurrency(creditsSummary.totalPaid, profile?.currency ?? 'CLP')}
+          </p>
+        </div>
+        <p className="col-span-2 text-[11px] text-slate-400">
+          {creditsSummary.activeCredits} {creditsSummary.activeCredits === 1 ? 'crédito activo' : 'créditos activos'} · {creditsSummary.remainingInstallments} cuotas pendientes de {creditsSummary.totalInstallments} totales.
+        </p>
       </Card>
 
       {error ? <Card className="p-5 text-sm text-rose-200">{error}</Card> : null}
 
       {sortedCredits.length > 0 ? (
-        <div className="space-y-4">
-          {sortedCredits.map((credit) => (
-            <CreditCard
-              key={credit.id}
-              credit={credit}
-              currency={profile?.currency ?? 'CLP'}
-              onOpenDetails={(currentCredit) => setSelectedCreditId(currentCredit.id)}
-              onEdit={(currentCredit) => {
-                setEditingCreditId(currentCredit.id);
-                setCreditModalOpen(true);
-              }}
-              onDelete={(currentCredit) => setCreditPendingDelete(currentCredit)}
-            />
-          ))}
-        </div>
+        <section className="space-y-3" aria-label="Listado de créditos">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-bold text-ink">Mis créditos</h2>
+            <span className="rounded-full bg-white/5 px-2.5 py-1 text-xs font-semibold text-slate-300">{sortedCredits.length}</span>
+          </div>
+          <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#1d2027] shadow-glow">
+            <ul className="divide-y divide-white/10">
+              {sortedCredits.map((credit) => (
+                <CreditCard
+                  key={credit.id}
+                  credit={credit}
+                  currency={profile?.currency ?? 'CLP'}
+                  expanded={expandedCreditActions === credit.id}
+                  onToggleActions={() => setExpandedCreditActions((current) => current === credit.id ? null : credit.id)}
+                  onOpenDetails={(currentCredit) => {
+                    setExpandedCreditActions(null);
+                    setSelectedCreditId(currentCredit.id);
+                  }}
+                  onEdit={(currentCredit) => {
+                    setExpandedCreditActions(null);
+                    setEditingCreditId(currentCredit.id);
+                    setCreditModalOpen(true);
+                  }}
+                  onDelete={(currentCredit) => {
+                    setExpandedCreditActions(null);
+                    setCreditPendingDelete(currentCredit);
+                  }}
+                />
+              ))}
+            </ul>
+          </div>
+        </section>
       ) : (
         <EmptyState
-          title="Aun no registras creditos"
-          description="Cuando agregues tu primer credito podras ir descontando cada cuota y ver cuanto te falta por pagar."
-          action={
-            <Button size="lg" onClick={openCreateCredit}>
-              Crear mi primer credito
-            </Button>
-          }
+          title="Aún no registras créditos"
+          description="Agrega un crédito para seguir tus cuotas y el saldo pendiente."
+          action={<Button size="lg" onClick={openCreateCredit}>Crear mi primer crédito</Button>}
         />
       )}
 
       <Modal
         open={creditModalOpen}
         title={editingCredit ? 'Editar credito' : 'Nuevo credito'}
-        description="Define el monto total, el numero de cuotas y la fecha del primer vencimiento."
+        description="Indica el monto, las cuotas y el primer vencimiento."
+        centered
         onClose={closeCreditModal}
       >
         <CreditForm initialValue={editingCredit} onSubmit={handleSaveCredit} onCancel={closeCreditModal} />
@@ -271,28 +283,28 @@ export function CreditsPage() {
       >
         {selectedCredit ? (
           <div className="space-y-5">
-            <Card className="grid gap-4 p-5 sm:grid-cols-2">
+            <Card className="grid grid-cols-2 gap-3 p-3.5 sm:p-5">
               <div>
                 <p className="text-sm text-slate-400">Proximo vencimiento</p>
-                <p className="mt-2 text-lg font-bold text-ink">
+                <p className="mt-1 break-words text-sm font-bold text-ink sm:text-lg">
                   {selectedCreditNextDueDate ? formatDate(selectedCreditNextDueDate) : 'Credito saldado'}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-slate-400">Cuotas registradas</p>
-                <p className="mt-2 text-lg font-bold text-ink">
+                <p className="mt-1 break-words text-sm font-bold text-ink sm:text-lg">
                   {selectedCredit.paidInstallments} de {selectedCredit.totalInstallments}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-slate-400">Monto total</p>
-                <p className="mt-2 text-lg font-bold text-ink">
+                <p className="mt-1 break-words text-sm font-bold text-ink sm:text-lg">
                   {formatCurrency(selectedCredit.totalAmount, profile?.currency ?? 'CLP')}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-slate-400">Primer vencimiento</p>
-                <p className="mt-2 text-lg font-bold text-ink">{formatDate(selectedCredit.firstDueDate)}</p>
+                <p className="mt-1 break-words text-sm font-bold text-ink sm:text-lg">{formatDate(selectedCredit.firstDueDate)}</p>
               </div>
             </Card>
 
@@ -317,7 +329,7 @@ export function CreditsPage() {
             {installmentsLoading ? (
               <Loader label="Cargando cuotas..." />
             ) : installments.length > 0 ? (
-              <div className="space-y-3">
+              <div className="divide-y divide-white/10 rounded-2xl border border-white/10 bg-white/[0.035] px-3 py-1">
                 {installments.map((installment) => (
                   <CreditInstallmentListItem
                     key={installment.id}
@@ -355,7 +367,7 @@ export function CreditsPage() {
       <Modal
         open={installmentModalOpen && Boolean(selectedCredit)}
         title={selectedInstallment ? 'Editar cuota' : 'Registrar cuota'}
-        description="Guarda el monto abonado y la fecha en que ingresaste la cuota."
+        description="Registra el monto y la fecha del pago."
         onClose={closeInstallmentModal}
       >
         {selectedCredit ? (

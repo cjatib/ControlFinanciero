@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { TransactionListItem } from '@/components/TransactionListItem';
+import { BudgetDistributionSummary } from '@/components/dashboard/BudgetDistributionSummary';
+import { CompactMovementList } from '@/components/dashboard/CompactMovementList';
 import { FinancialInsights } from '@/components/FinancialInsights';
 import { Card } from '@/components/ui/Card';
 import { Loader } from '@/components/ui/Loader';
 import { useAuth } from '@/hooks/useAuth';
 import { useBudgetSavings } from '@/hooks/useBudgetSavings';
+import { useCategories } from '@/hooks/useCategories';
 import { useMonthlyBudgets } from '@/hooks/useMonthlyBudgets';
 import { useTransactions } from '@/hooks/useTransactions';
 import { formatCurrency } from '@/lib/format';
@@ -25,18 +27,6 @@ function MonthPicker({ month, onChange }: { month: string; onChange: (value: str
       <input type="month" value={month} onChange={(event) => onChange(event.target.value)}
         className="min-w-0 max-w-full bg-transparent text-sm font-semibold text-ink outline-none" />
     </label>
-  );
-}
-
-function ProgressBar({ color, progress }: { color: string; progress: number }) {
-  return (
-    <div className="h-3 overflow-hidden rounded-full bg-white/10" role="progressbar"
-      aria-valuenow={Math.round(Math.min(100, progress))} aria-valuemin={0} aria-valuemax={100}>
-      <div className="h-full rounded-full transition-all" style={{
-        background: color,
-        width: String(Math.max(0, Math.min(100, progress))) + '%',
-      }} />
-    </div>
   );
 }
 
@@ -62,6 +52,7 @@ function EmptyBudgetCard() {
 export function DashboardPage() {
   const { profile } = useAuth();
   const { transactions, loading: transactionsLoading, error: transactionsError } = useTransactions();
+  const { categories } = useCategories();
   const { budgets, loading: budgetLoading, error: budgetError } = useMonthlyBudgets();
   const [month, setMonth] = useState(getCurrentMonthValue());
   const { budget, sourceMonth, inherited } = resolveMonthlyBudget(budgets, month);
@@ -82,9 +73,6 @@ export function DashboardPage() {
   const unassignedExpenseAmount = monthTransactions
     .filter((tx) => tx.type === 'expense' && !linkedCategoryIds.has(tx.categoryId))
     .reduce((sum, tx) => sum + tx.amount, 0);
-  const savingTotal = progress.filter((item) => item.group.kind === 'saving').reduce((sum, item) => sum + item.actual, 0);
-  const savingAssigned = progress.filter((item) => item.group.kind === 'saving').reduce((sum, item) => sum + item.assigned, 0);
-  const distributionUsed = progress.filter((item) => item.group.kind === 'expense').reduce((sum, item) => sum + item.actual, 0);
   const monthLabel = /^\d{4}-(0[1-9]|1[0-2])$/.test(month)
     ? new Intl.DateTimeFormat('es-CL', { month: 'long', year: 'numeric' })
       .format(new Date(Number(month.slice(0, 4)), Number(month.slice(5, 7)) - 1, 1))
@@ -150,103 +138,19 @@ export function DashboardPage() {
 
       {budget ? (
         <>
-          <Card className="space-y-5 p-5">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-extrabold">Distribución de mi sueldo</h2>
-                <p className="mt-1 text-xs text-slate-400">Base: {formatCurrency(budget.incomeAmount, currency)}</p>
-              </div>
-              <Link to={'/plan?month=' + month} className="rounded-xl bg-accent/15 px-3 py-2 text-xs font-bold text-accent">
-                {inherited ? 'Personalizar' : 'Editar'}
-              </Link>
-            </div>
-            {inherited ? (
-              <p className="rounded-xl border border-accent/20 bg-accent/10 px-3 py-2 text-xs text-accent">
-                Plan heredado de {sourceMonth}. Se mantiene activo hasta que configures una versión diferente para este mes.
-              </p>
-            ) : null}
-            <div className="flex h-3 overflow-hidden rounded-full bg-white/10">
-              {progress.map((item) => (
-                <div key={item.group.id} style={{
-                  width: String(item.group.percentage) + '%',
-                  background: item.group.color,
-                }} aria-hidden="true" />
-              ))}
-            </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {progress.map((item) => (
-                <div key={item.group.id} className="rounded-2xl border border-white/10 bg-[#292c35] p-3">
-                  <span className="text-xs font-bold" style={{ color: item.group.color }}>{item.group.percentage}%</span>
-                  <p className="mt-1 truncate text-sm font-bold" title={item.group.name}>{item.group.name}</p>
-                  <div className="mt-3 flex h-24 items-end overflow-hidden rounded-xl bg-white/5">
-                    <div className="w-full rounded-xl transition-all" style={{
-                      height: String(Math.max(3, Math.min(100, item.progress))) + '%',
-                      background: item.group.color,
-                    }} />
-                  </div>
-                  <p className="mt-2 truncate text-sm font-bold">{formatCurrency(item.actual, currency)}</p>
-                  <p className="text-xs text-slate-400">{Math.round(item.progress)}% {item.group.kind === 'saving' ? 'ahorrado' : 'gastado'}</p>
-                </div>
-              ))}
-            </div>
-            <p className="text-xs leading-5 text-slate-400">
-              Los grupos de gasto muestran consumo del límite; los grupos de ahorro muestran cumplimiento del objetivo.
-            </p>
-          </Card>
-          <div className="space-y-3">
-            <h2 className="text-lg font-extrabold">Objetivos del mes</h2>
-            {progress.map((item) => (
-              <Card key={item.group.id} className="space-y-3 p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-bold">{item.group.name}</p>
-                    <p className="mt-1 text-xs text-slate-400">
-                      {item.group.kind === 'saving' ? 'Meta de ahorro' : 'Presupuesto de gasto'} · {item.group.percentage}%
-                    </p>
-                  </div>
-                  <span className="shrink-0 text-sm font-bold" style={{ color: item.group.color }}>
-                    {Math.round(item.progress)}%
-                  </span>
-                </div>
-                <ProgressBar color={item.overBudget ? '#F4AEA7' : item.group.color} progress={item.progress} />
-                <div className="flex flex-wrap items-end justify-between gap-2">
-                  <div>
-                    <p className="text-xs text-slate-400">{item.group.kind === 'saving' ? 'Ahorrado' : 'Gastado'}</p>
-                    <p className="mt-1 font-bold">{formatCurrency(item.actual, currency)}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-slate-400">{item.overBudget ? 'Excedido' : item.group.kind === 'saving' ? 'Falta ahorrar' : 'Disponible'}</p>
-                    <p className={'mt-1 font-extrabold ' + (item.overBudget ? 'text-rose-300' : 'text-ink')}>
-                      {formatCurrency(item.overBudget ? item.actual - item.assigned : item.remaining, currency)}
-                    </p>
-                  </div>
-                </div>
-                <p className="text-xs text-slate-400">Asignado: {formatCurrency(item.assigned, currency)}</p>
-                {item.group.kind === 'saving' && !item.group.savingsPlanId ? (
-                  <p className="text-xs text-amber-200">Vincula un plan de ahorro para mostrar aportes reales.</p>
-                ) : null}
-                {item.group.kind === 'expense' && item.group.categoryIds.length === 0 ? (
-                  <p className="text-xs text-amber-200">Vincula categorías de gasto para calcular el avance.</p>
-                ) : null}
-              </Card>
-            ))}
-          </div>
+          <BudgetDistributionSummary
+            currency={currency}
+            incomeAmount={budget.incomeAmount}
+            inherited={inherited}
+            month={month}
+            progress={progress}
+            sourceMonth={sourceMonth}
+          />
           {unassignedExpenseAmount > 0 ? (
             <Card className="space-y-2 p-4">
               <p className="text-sm font-bold text-amber-100">Gastos sin asignar a grupos</p>
               <p className="text-xl font-extrabold">{formatCurrency(unassignedExpenseAmount, currency)}</p>
               <p className="text-xs text-slate-400">Estos gastos sí están incluidos en tu saldo, pero no en las barras de los grupos. <Link to={"/plan?month=" + month} className="font-bold text-accent">Revisar categorías</Link></p>
-            </Card>
-          ) : null}
-          {savingAssigned > 0 ? (
-            <Card className="space-y-2 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className="font-bold">Ahorro planificado</p>
-                <span className="text-sm font-bold text-emerald-300">{Math.round(savingTotal / savingAssigned * 100)}%</span>
-              </div>
-              <ProgressBar color="#A6D9C7" progress={savingTotal / savingAssigned * 100} />
-              <p className="text-xs text-slate-400">{formatCurrency(savingTotal, currency)} registrados / {formatCurrency(savingAssigned, currency)} de objetivo</p>
-              <p className="text-xs text-slate-400">Aportes reales registrados en planes vinculados. Gastos asignados: {formatCurrency(distributionUsed, currency)}.</p>
             </Card>
           ) : null}
         </>
@@ -269,11 +173,11 @@ export function DashboardPage() {
           <Link to="/history" className="text-xs font-bold text-accent">Ver historial</Link>
         </div>
         {monthTransactions.length ? (
-          <div className="space-y-2">
-            {monthTransactions.slice(0, 5).map((transaction) => (
-              <TransactionListItem key={transaction.id} transaction={transaction} currency={currency} />
-            ))}
-          </div>
+          <CompactMovementList
+            transactions={monthTransactions.slice(0, 5)}
+            categories={categories}
+            currency={currency}
+          />
         ) : (
           <Card className="p-5 text-sm text-slate-400">No hay movimientos registrados para este mes.</Card>
         )}

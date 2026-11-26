@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Button } from '@/components/ui/Button';
+import { FormActions } from '@/components/ui/FormActions';
 import { Input } from '@/components/ui/Input';
 import { getFirebaseErrorMessage } from '@/utils/firebaseErrors';
 import { validateAmount, validateRequired } from '@/utils/validators';
@@ -73,11 +73,11 @@ export function SavingsPlanForm({ initialValue, onSubmit, onCancel }: SavingsPla
   }
 
   return (
-    <form className="space-y-5" onSubmit={handleSubmit}>
+    <form className="space-y-3.5" onSubmit={handleSubmit}>
       <Input
         id="savings-reason"
-        label="Motivo de ahorro"
-        placeholder="Ej. Fondo emergencia, vacaciones, pie casa"
+        label="Nombre del plan"
+        placeholder="Ej. Fondo de emergencia"
         value={formState.reason}
         error={errors.reason}
         onChange={(event) => setFormState((current) => ({ ...current, reason: event.target.value }))}
@@ -85,7 +85,8 @@ export function SavingsPlanForm({ initialValue, onSubmit, onCancel }: SavingsPla
 
       <Input
         id="savings-monthly-target"
-        label="Monto mensual"
+        label="Meta mensual (CLP)"
+        className="font-semibold tabular-nums"
         type="number"
         inputMode="numeric"
         min="0"
@@ -102,16 +103,11 @@ export function SavingsPlanForm({ initialValue, onSubmit, onCancel }: SavingsPla
         </p>
       ) : null}
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-
-        <Button fullWidth size="lg" type="submit" disabled={submitting}>
-          {submitting ? 'Guardando...' : initialValue ? 'Actualizar plan' : 'Crear plan'}
-        </Button>
-
-        <Button variant="ghost" fullWidth size="lg" type="button" onClick={onCancel} disabled={submitting}>
-          Cancelar
-        </Button>
-      </div>
+      <FormActions
+        submitLabel={initialValue ? 'Guardar cambios' : 'Crear plan'}
+        submitting={submitting}
+        onCancel={onCancel}
+      />
     </form>
   );
 }

@@ -1,16 +1,13 @@
 import { useState, type FormEvent } from 'react';
-import { Button } from '@/components/ui/Button';
+import { FormActions } from '@/components/ui/FormActions';
 import { Combobox } from '@/components/ui/Combobox';
 import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
 import {
   CATEGORY_COLOR_OPTIONS,
   CATEGORY_ICON_OPTIONS,
   CategoryGlyph,
   DEFAULT_CATEGORY_COLOR_BY_TYPE,
   DEFAULT_CATEGORY_ICON_BY_TYPE,
-  getCategoryColorLabel,
-  getCategoryIconLabel,
 } from '@/lib/categoryAppearance';
 import { getFirebaseErrorMessage } from '@/utils/firebaseErrors';
 import { validateRequired } from '@/utils/validators';
@@ -77,49 +74,45 @@ export function CategoryForm({ initialValue, defaultType = 'expense', onSubmit, 
   }
 
   return (
-    <form className="space-y-5" onSubmit={handleSubmit}>
+    <form className="space-y-3.5" onSubmit={handleSubmit}>
       <Input
         id="category-name"
-        label="Nombre"
-        placeholder="Ej. Sueldo, Arriendo, Transporte"
+        label="Nombre de categoría"
+        placeholder="Ej. Supermercado"
         value={formState.name}
         error={errors.name}
         onChange={(event) => setFormState((current) => ({ ...current, name: event.target.value }))}
       />
 
-      <Select
-        id="category-type"
-        label="Tipo"
-        value={formState.type}
-        onChange={(event) =>
-          setFormState((current) => {
-            const nextType = event.target.value as CategoryPayload['type'];
-            const nextColor =
-              current.color === DEFAULT_CATEGORY_COLOR_BY_TYPE[current.type]
-                ? DEFAULT_CATEGORY_COLOR_BY_TYPE[nextType]
-                : current.color;
-            const nextIcon =
-              current.icon === DEFAULT_CATEGORY_ICON_BY_TYPE[current.type]
-                ? DEFAULT_CATEGORY_ICON_BY_TYPE[nextType]
-                : current.icon;
-
-            return {
-              ...current,
-              type: nextType,
-              color: nextColor,
-              icon: nextIcon,
-            };
-          })
-        }
-      >
-        <option value="expense">Gasto</option>
-        <option value="income">Ingreso</option>
-      </Select>
+      <div role="group" aria-label="Tipo de categoría" className="space-y-1.5">
+        <p className="text-sm font-semibold text-slate-200">Tipo</p>
+        <div className="grid grid-cols-2 gap-2">
+          {(['expense', 'income'] as const).map((type) => (
+            <button
+              key={type}
+              type="button"
+              aria-pressed={formState.type === type}
+              onClick={() => setFormState((current) => {
+                const nextColor = current.color === DEFAULT_CATEGORY_COLOR_BY_TYPE[current.type]
+                  ? DEFAULT_CATEGORY_COLOR_BY_TYPE[type] : current.color;
+                const nextIcon = current.icon === DEFAULT_CATEGORY_ICON_BY_TYPE[current.type]
+                  ? DEFAULT_CATEGORY_ICON_BY_TYPE[type] : current.icon;
+                return { ...current, type, color: nextColor, icon: nextIcon };
+              })}
+              className={'min-h-11 rounded-xl border text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent ' +
+                (formState.type === type
+                  ? 'border-accent bg-accent text-slate-950'
+                  : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10')}
+            >
+              {type === 'expense' ? 'Gasto' : 'Ingreso'}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <Combobox
         label="Color"
-        description="Selecciona un color desde una lista compacta."
-        value={formState.color}
+                value={formState.color}
         options={CATEGORY_COLOR_OPTIONS.map((option) => ({
           ...option,
           keywords: [option.label, option.value],
@@ -152,8 +145,7 @@ export function CategoryForm({ initialValue, defaultType = 'expense', onSubmit, 
 
       <Combobox
         label="Icono"
-        description="Elige un icono visual desde un dropdown compacto."
-        value={formState.icon}
+                value={formState.icon}
         options={CATEGORY_ICON_OPTIONS.map((option) => ({
           ...option,
           keywords: [option.label, option.value],
@@ -184,16 +176,11 @@ export function CategoryForm({ initialValue, defaultType = 'expense', onSubmit, 
 
       {submitError ? <p className="rounded-2xl border border-danger/25 bg-danger/10 px-4 py-3 text-sm text-rose-200">{submitError}</p> : null}
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-
-        <Button fullWidth size="lg" type="submit" disabled={submitting}>
-          {submitting ? 'Guardando...' : initialValue ? 'Actualizar categoria' : 'Crear categoria'}
-        </Button>
-
-        <Button variant="ghost" fullWidth size="lg" type="button" onClick={onCancel} disabled={submitting}>
-          Cancelar
-        </Button>
-      </div>
+      <FormActions
+        submitLabel={initialValue ? 'Guardar cambios' : 'Crear categoría'}
+        submitting={submitting}
+        onCancel={onCancel}
+      />
     </form>
   );
 }

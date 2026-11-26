@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { TransactionListItem } from '@/components/TransactionListItem';
+import { CompactMovementList } from '@/components/dashboard/CompactMovementList';
 import { Button } from '@/components/ui/Button';
+import { FormActions } from '@/components/ui/FormActions';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Loader } from '@/components/ui/Loader';
 import { Modal } from '@/components/ui/Modal';
-import { PageHeader } from '@/components/ui/PageHeader';
 import { TransactionForm } from '@/forms/TransactionForm';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
@@ -79,31 +79,42 @@ export function TransactionsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow="Transacciones"
-        title="Registra ingresos y gastos"
-        description="Mantén tu flujo actualizado con transacciones editables, seguras y asociadas a tus categorias."
-        action={<div className="hidden sm:block"><Button onClick={() => setModalOpen(true)}>Nueva transacción</Button></div>}
-      />
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent/80">Actividad financiera</p>
+          <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">Movimientos</h1>
+          <p className="mt-1 text-xs leading-5 text-slate-400">Consulta y gestiona tus ingresos y gastos.</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setSelectedTransaction(null);
+            setModalOpen(true);
+          }}
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-slate-950 shadow-sm transition hover:bg-[#c9d4ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          aria-label="Registrar nuevo movimiento"
+        >
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+          </svg>
+          Nuevo
+        </button>
+      </header>
 
       {error ? <Card className="p-5 text-sm text-rose-200">{error}</Card> : null}
 
       {transactions.length > 0 ? (
-        <div className="space-y-3">
-          {transactions.map((transaction) => (
-            <TransactionListItem
-              key={transaction.id}
-              transaction={transaction}
-              currency={profile?.currency ?? 'CLP'}
-              showActions
-              onEdit={(currentTransaction) => {
-                setSelectedTransaction(currentTransaction);
-                setModalOpen(true);
-              }}
-              onDelete={handleDelete}
-            />
-          ))}
-        </div>
+        <CompactMovementList
+          transactions={transactions}
+          categories={categories}
+          currency={profile?.currency ?? 'CLP'}
+          showActions
+          onEdit={(currentTransaction) => {
+            setSelectedTransaction(currentTransaction);
+            setModalOpen(true);
+          }}
+          onDelete={handleDelete}
+        />
       ) : (
         <EmptyState
           title="Aun no registras transacciones"
@@ -122,16 +133,18 @@ export function TransactionsPage() {
 
       <Modal
         open={modalOpen}
-        title={selectedTransaction ? 'Editar transaccion' : 'Nueva transaccion'}
-        description="Guarda el monto, categoria y fecha para mantener tu balance al dia."
+        title={selectedTransaction ? 'Editar movimiento' : 'Nuevo movimiento'}
+        description="Registra el monto, la categoría y la fecha."
+        centered
         onClose={closeModal}
         footer={
-          <div className="flex flex-col gap-2">
-            <Button form="transaction-editor" type="submit" fullWidth size="lg" disabled={submitting || categories.length === 0}>
-              {submitting ? 'Guardando...' : selectedTransaction ? 'Guardar cambios' : 'Guardar movimiento'}
-            </Button>
-            <Button variant="ghost" type="button" fullWidth onClick={closeModal} disabled={submitting}>Cancelar</Button>
-          </div>
+          <FormActions
+            form="transaction-editor"
+            submitLabel={selectedTransaction ? 'Guardar cambios' : 'Guardar movimiento'}
+            submitting={submitting}
+            disabled={categories.length === 0}
+            onCancel={closeModal}
+          />
         }
       >
         <TransactionForm

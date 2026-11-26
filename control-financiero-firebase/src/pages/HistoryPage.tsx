@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { TransactionListItem } from '@/components/TransactionListItem';
+import { Link } from 'react-router-dom';
+import { CompactMovementList } from '@/components/dashboard/CompactMovementList';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Loader } from '@/components/ui/Loader';
 import { Modal } from '@/components/ui/Modal';
-import { PageHeader } from '@/components/ui/PageHeader';
 import { HistoryFiltersForm } from '@/forms/HistoryFiltersForm';
 import { TransactionForm } from '@/forms/TransactionForm';
 import { useAuth } from '@/hooks/useAuth';
@@ -73,13 +73,25 @@ export function HistoryPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow="Historico"
-        title="Explora tus movimientos"
-        description="Busca todos tus ingresos y gastos, filtrando por tipo, categoria, texto y mes."
-      />
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent/80">Tu actividad</p>
+          <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">Historial</h1>
+          <p className="mt-1 text-xs leading-5 text-slate-400">Encuentra movimientos por fecha, tipo o categoría.</p>
+        </div>
+        <Link
+          to="/transactions?create=1"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-slate-950 transition hover:bg-[#c9d4ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          aria-label="Registrar nuevo movimiento"
+        >
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+          </svg>
+          Nuevo
+        </Link>
+      </header>
 
-      <Card className="p-5">
+      <Card className="p-3.5 sm:p-5">
         <HistoryFiltersForm
           filters={filters}
           categories={categories}
@@ -88,50 +100,55 @@ export function HistoryPage() {
         />
       </Card>
 
-      <Card className="grid gap-4 p-5 sm:grid-cols-2">
-        <div>
-          <p className="text-sm text-slate-400">Ingresos del mes</p>
-          <p className="mt-2 text-2xl font-bold text-emerald-300">
+      <Card className="grid grid-cols-2 gap-2 p-3.5 sm:gap-4 sm:p-5" aria-label="Totales de movimientos filtrados">
+        <div className="min-w-0 border-r border-white/10 pr-2 sm:pr-4">
+          <p className="text-xs text-slate-400">Ingresos</p>
+          <p className="mt-1 break-words text-base font-extrabold tabular-nums text-emerald-300 sm:text-xl">
             {formatCurrency(filteredSummary.totalIncome, profile?.currency ?? 'CLP')}
           </p>
         </div>
-        <div>
-          <p className="text-sm text-slate-400">Gastos del mes</p>
-          <p className="mt-2 text-2xl font-bold text-rose-300">
+        <div className="min-w-0 pl-1">
+          <p className="text-xs text-slate-400">Gastos</p>
+          <p className="mt-1 break-words text-base font-extrabold tabular-nums text-rose-300 sm:text-xl">
             {formatCurrency(filteredSummary.totalExpense, profile?.currency ?? 'CLP')}
           </p>
         </div>
+        <p className="col-span-2 text-[11px] text-slate-500">Totales calculados según los filtros seleccionados.</p>
       </Card>
 
       {error ? <Card className="p-5 text-sm text-rose-200">{error}</Card> : null}
 
-      {filteredTransactions.length > 0 ? (
-        <div className="space-y-3">
-          {filteredTransactions.map((transaction) => (
-            <TransactionListItem
-              key={transaction.id}
-              transaction={transaction}
-              currency={profile?.currency ?? 'CLP'}
-              showActions
-              onEdit={(currentTransaction) => {
-                setSelectedTransaction(currentTransaction);
-                setModalOpen(true);
-              }}
-              onDelete={(currentTransaction) => setTransactionPendingDelete(currentTransaction)}
-            />
-          ))}
+      <section className="space-y-3" aria-label="Resultados del historial">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-sm font-bold text-ink">Movimientos</h2>
+          <span className="rounded-full bg-white/5 px-2.5 py-1 text-xs font-semibold text-slate-300">
+            {filteredTransactions.length} {filteredTransactions.length === 1 ? 'resultado' : 'resultados'}
+          </span>
         </div>
-      ) : (
-        <EmptyState
-          title="No encontramos movimientos"
-          description="Prueba cambiando el mes, el tipo, la categoria o el texto buscado."
-        />
-      )}
+        {filteredTransactions.length > 0 ? (
+          <CompactMovementList
+            transactions={filteredTransactions}
+            categories={categories}
+            currency={profile?.currency ?? 'CLP'}
+            showActions
+            onEdit={(currentTransaction) => {
+              setSelectedTransaction(currentTransaction);
+              setModalOpen(true);
+            }}
+            onDelete={(currentTransaction) => setTransactionPendingDelete(currentTransaction)}
+          />
+        ) : (
+          <EmptyState
+            title="No encontramos movimientos"
+            description="Prueba cambiando el mes, el tipo, la categoría o el texto buscado."
+          />
+        )}
+      </section>
 
       <Modal
         open={modalOpen}
-        title="Editar transaccion"
-        description="Actualiza el monto, categoria o fecha del movimiento seleccionado."
+        title="Editar movimiento"
+        description="Corrige el monto, la categoría o la fecha."
         onClose={closeModal}
         footer={
           <div className="flex flex-col gap-2">

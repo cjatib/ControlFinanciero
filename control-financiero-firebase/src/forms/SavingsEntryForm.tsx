@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Button } from '@/components/ui/Button';
+import { FormActions } from '@/components/ui/FormActions';
+import { OptionalDetails } from '@/components/ui/OptionalDetails';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { getFirebaseErrorMessage } from '@/utils/firebaseErrors';
@@ -78,10 +79,11 @@ export function SavingsEntryForm({ initialValue, onSubmit, onCancel }: SavingsEn
   }
 
   return (
-    <form className="space-y-5" onSubmit={handleSubmit}>
+    <form className="space-y-3.5" onSubmit={handleSubmit}>
       <Input
         id="savings-entry-amount"
-        label="Monto ingresado"
+        label="Monto del aporte (CLP)"
+        className="font-semibold tabular-nums"
         type="number"
         inputMode="numeric"
         min="0"
@@ -101,13 +103,16 @@ export function SavingsEntryForm({ initialValue, onSubmit, onCancel }: SavingsEn
         onChange={(event) => setFormState((current) => ({ ...current, entryDate: event.target.value }))}
       />
 
-      <Textarea
-        id="savings-entry-description"
-        label="Nota"
-        placeholder="Opcional. Ej. transferencia, efectivo, ahorro extra."
-        value={formState.description}
-        onChange={(event) => setFormState((current) => ({ ...current, description: event.target.value }))}
-      />
+      <OptionalDetails defaultOpen={Boolean(initialValue?.description?.trim())}>
+        <Textarea
+          id="savings-entry-description"
+          label="Nota"
+          rows={2}
+          placeholder="Ej. Transferencia o ahorro extra"
+          value={formState.description}
+          onChange={(event) => setFormState((current) => ({ ...current, description: event.target.value }))}
+        />
+      </OptionalDetails>
 
       {submitError ? (
         <p className="rounded-2xl border border-danger/25 bg-danger/10 px-4 py-3 text-sm text-rose-200">
@@ -115,16 +120,11 @@ export function SavingsEntryForm({ initialValue, onSubmit, onCancel }: SavingsEn
         </p>
       ) : null}
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-
-        <Button fullWidth size="lg" type="submit" disabled={submitting}>
-          {submitting ? 'Guardando...' : initialValue ? 'Actualizar ingreso' : 'Registrar ahorro'}
-        </Button>
-
-        <Button variant="ghost" fullWidth size="lg" type="button" onClick={onCancel} disabled={submitting}>
-          Cancelar
-        </Button>
-      </div>
+      <FormActions
+        submitLabel={initialValue ? 'Guardar cambios' : 'Registrar ahorro'}
+        submitting={submitting}
+        onCancel={onCancel}
+      />
     </form>
   );
 }

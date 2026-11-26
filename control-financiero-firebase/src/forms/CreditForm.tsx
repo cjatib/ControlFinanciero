@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Button } from '@/components/ui/Button';
+import { FormActions } from '@/components/ui/FormActions';
+import { OptionalDetails } from '@/components/ui/OptionalDetails';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { toInputDateValue, parseDateInput } from '@/utils/date';
@@ -111,43 +112,46 @@ export function CreditForm({ initialValue, onSubmit, onCancel }: CreditFormProps
   }
 
   return (
-    <form className="space-y-5" onSubmit={handleSubmit}>
+    <form className="space-y-3.5" onSubmit={handleSubmit}>
       <Input
         id="credit-name"
-        label="Nombre del credito"
-        placeholder="Ej. Prestamo auto, avance, tarjeta"
+        label="Nombre del crédito"
+        placeholder="Ej. Crédito automotriz"
         value={formState.name}
         error={errors.name}
         onChange={(event) => setFormState((current) => ({ ...current, name: event.target.value }))}
       />
 
-      <Input
-        id="credit-total-amount"
-        label="Monto total"
-        type="number"
-        inputMode="numeric"
-        min="0"
-        step="1"
-        placeholder="0"
-        value={formState.totalAmount}
-        error={errors.totalAmount}
-        onChange={(event) => setFormState((current) => ({ ...current, totalAmount: event.target.value }))}
-      />
-
-      <Input
-        id="credit-installments"
-        label="Cantidad de cuotas"
-        type="number"
-        inputMode="numeric"
-        min="1"
-        step="1"
-        placeholder="12"
-        value={formState.totalInstallments}
-        error={errors.totalInstallments}
-        onChange={(event) =>
-          setFormState((current) => ({ ...current, totalInstallments: event.target.value }))
-        }
-      />
+      <div className="grid grid-cols-2 gap-3">
+        <Input
+          id="credit-total-amount"
+          label="Monto (CLP)"
+          className="font-semibold tabular-nums"
+          type="number"
+          inputMode="numeric"
+          min="0"
+          step="1"
+          placeholder="0"
+          value={formState.totalAmount}
+          error={errors.totalAmount}
+          onChange={(event) => setFormState((current) => ({ ...current, totalAmount: event.target.value }))}
+        />
+  
+        <Input
+          id="credit-installments"
+          label="Cuotas"
+          type="number"
+          inputMode="numeric"
+          min="1"
+          step="1"
+          placeholder="12"
+          value={formState.totalInstallments}
+          error={errors.totalInstallments}
+          onChange={(event) =>
+            setFormState((current) => ({ ...current, totalInstallments: event.target.value }))
+          }
+        />
+      </div>
 
       <Input
         id="credit-first-due-date"
@@ -158,13 +162,16 @@ export function CreditForm({ initialValue, onSubmit, onCancel }: CreditFormProps
         onChange={(event) => setFormState((current) => ({ ...current, firstDueDate: event.target.value }))}
       />
 
-      <Textarea
-        id="credit-description"
-        label="Descripcion"
-        placeholder="Opcional. Agrega el banco, casa comercial o un detalle que te sirva para identificarlo."
-        value={formState.description}
-        onChange={(event) => setFormState((current) => ({ ...current, description: event.target.value }))}
-      />
+      <OptionalDetails label="Agregar descripción (opcional)" defaultOpen={Boolean(initialValue?.description?.trim())}>
+        <Textarea
+          id="credit-description"
+          label="Detalle"
+          rows={2}
+          placeholder="Ej. Banco, entidad o condiciones"
+          value={formState.description}
+          onChange={(event) => setFormState((current) => ({ ...current, description: event.target.value }))}
+        />
+      </OptionalDetails>
 
       {initialValue ? (
         <p className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
@@ -180,16 +187,11 @@ export function CreditForm({ initialValue, onSubmit, onCancel }: CreditFormProps
         </p>
       ) : null}
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-
-        <Button fullWidth size="lg" type="submit" disabled={submitting}>
-          {submitting ? 'Guardando...' : initialValue ? 'Actualizar credito' : 'Crear credito'}
-        </Button>
-
-        <Button variant="ghost" fullWidth size="lg" type="button" onClick={onCancel} disabled={submitting}>
-          Cancelar
-        </Button>
-      </div>
+      <FormActions
+        submitLabel={initialValue ? 'Guardar cambios' : 'Crear crédito'}
+        submitting={submitting}
+        onCancel={onCancel}
+      />
     </form>
   );
 }
