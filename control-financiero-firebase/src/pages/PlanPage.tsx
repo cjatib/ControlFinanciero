@@ -276,7 +276,7 @@ export function PlanPage() {
             setSaved(false);
           }}
           disabled={groups.length >= 100}
-          className="flex min-h-14 w-full items-center justify-center rounded-2xl border border-dashed border-accent/50 bg-accent/10 text-sm font-bold text-accent disabled:opacity-50">
+          className="flex min-h-11 w-full items-center justify-center rounded-xl border border-dashed border-accent/50 bg-accent/10 text-sm font-bold text-accent transition hover:bg-accent/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-50">
           + Agregar grupo
         </button>
         {unassigned.length > 0 ? (
