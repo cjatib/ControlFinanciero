@@ -135,6 +135,7 @@ export function TransactionsPage() {
         open={modalOpen}
         title={selectedTransaction ? 'Editar movimiento' : 'Nuevo movimiento'}
         description="Registra el monto, la categoría y la fecha."
+        centered
         onClose={closeModal}
         footer={
           <FormActions
