@@ -125,8 +125,8 @@ export function CategoriesPage() {
 
       <Modal
         open={modalOpen}
-        title={selectedCategory ? 'Editar categoria' : 'Nueva categoria'}
-        description="Define el tipo, nombre, color e icono para reutilizarla en tus transacciones."
+        title={selectedCategory ? 'Editar categoría' : 'Nueva categoría'}
+        description="Asigna un nombre y personaliza su apariencia."
         onClose={() => {
           setModalOpen(false);
           setSelectedCategory(null);
