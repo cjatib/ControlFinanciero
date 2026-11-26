@@ -237,7 +237,7 @@ export function SavingsPage() {
       <Modal
         open={planModalOpen}
         title={editingPlan ? 'Editar plan de ahorro' : 'Nuevo plan de ahorro'}
-        description="Define el motivo y el monto que quieres ahorrar mes a mes."
+        description="Establece el nombre y la meta mensual."
         onClose={closePlanModal}
         centered
       >
@@ -350,7 +350,7 @@ export function SavingsPage() {
       <Modal
         open={entryModalOpen && Boolean(selectedPlan)}
         title={selectedEntry ? 'Editar ingreso de ahorro' : 'Registrar ingreso de ahorro'}
-        description="Guarda el monto ahorrado y la fecha en que lo ingresaste."
+        description="Anota cuánto ahorraste y cuándo."
         onClose={closeEntryModal}
       >
         <SavingsEntryForm initialValue={selectedEntry} onSubmit={handleSaveEntry} onCancel={closeEntryModal} />
