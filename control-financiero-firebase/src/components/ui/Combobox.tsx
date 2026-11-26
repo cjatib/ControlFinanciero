@@ -87,7 +87,7 @@ export function Combobox({
   }, [isOpen]);
 
   return (
-    <div ref={rootRef} className="relative space-y-2">
+    <div ref={rootRef} className="relative min-w-0 space-y-1.5">
       <div>
         <p className="text-sm font-medium text-slate-200">{label}</p>
         {description ? <p className="mt-1 text-xs text-slate-400">{description}</p> : null}
@@ -95,7 +95,7 @@ export function Combobox({
 
       <button
         type="button"
-        className="flex w-full items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm text-ink transition hover:bg-white/8 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/10"
+        className="flex min-h-11 w-full items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-left text-sm text-ink transition hover:bg-white/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/20"
         aria-expanded={isOpen}
         onClick={() => {
           setIsOpen((current) => !current);
@@ -119,7 +119,7 @@ export function Combobox({
       </button>
 
       {isOpen ? (
-        <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-3xl border border-white/10 bg-slate-950/95 shadow-glow backdrop-blur-xl">
+        <div className="relative z-30 mt-2 overflow-hidden rounded-xl border border-white/10 bg-[#252936] shadow-glow sm:absolute sm:left-0 sm:right-0 sm:top-full">
           <div className="border-b border-white/10 p-3">
             <input
               type="text"
@@ -130,7 +130,7 @@ export function Combobox({
             />
           </div>
 
-          <div className="max-h-64 overflow-y-auto p-2">
+          <div className="max-h-48 overflow-y-auto p-2 sm:max-h-64">
             {filteredOptions.length > 0 ? (
               <div className="grid gap-2">
                 {filteredOptions.map((option) => {
@@ -141,7 +141,7 @@ export function Combobox({
                       key={option.value}
                       type="button"
                       className={cn(
-                        'flex w-full items-center rounded-2xl px-3 py-3 text-left text-sm transition',
+                        'flex min-h-11 w-full items-center rounded-xl px-3 py-2 text-left text-sm transition',
                         isSelected ? 'bg-white/10 text-ink' : 'text-slate-300 hover:bg-white/6',
                       )}
                       onClick={() => {
