@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { CompactMovementList } from '@/components/dashboard/CompactMovementList';
 import { Button } from '@/components/ui/Button';
+import { FormActions } from '@/components/ui/FormActions';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Loader } from '@/components/ui/Loader';
@@ -132,16 +133,17 @@ export function TransactionsPage() {
 
       <Modal
         open={modalOpen}
-        title={selectedTransaction ? 'Editar transaccion' : 'Nueva transaccion'}
-        description="Guarda el monto, categoria y fecha para mantener tu balance al dia."
+        title={selectedTransaction ? 'Editar movimiento' : 'Nuevo movimiento'}
+        description="Registra el monto, la categoría y la fecha."
         onClose={closeModal}
         footer={
-          <div className="flex flex-col gap-2">
-            <Button form="transaction-editor" type="submit" fullWidth size="lg" disabled={submitting || categories.length === 0}>
-              {submitting ? 'Guardando...' : selectedTransaction ? 'Guardar cambios' : 'Guardar movimiento'}
-            </Button>
-            <Button variant="ghost" type="button" fullWidth onClick={closeModal} disabled={submitting}>Cancelar</Button>
-          </div>
+          <FormActions
+            form="transaction-editor"
+            submitLabel={selectedTransaction ? 'Guardar cambios' : 'Guardar movimiento'}
+            submitting={submitting}
+            disabled={categories.length === 0}
+            onCancel={closeModal}
+          />
         }
       >
         <TransactionForm
