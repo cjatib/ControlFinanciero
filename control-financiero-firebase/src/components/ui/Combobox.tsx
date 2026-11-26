@@ -87,7 +87,7 @@ export function Combobox({
   }, [isOpen]);
 
   return (
-    <div ref={rootRef} className="relative min-w-0 space-y-1.5">
+    <div ref={rootRef} data-combobox-expanded={isOpen ? "true" : undefined} className="relative min-w-0 space-y-1.5">
       <div>
         <p className="text-sm font-medium text-slate-200">{label}</p>
         {description ? <p className="mt-1 text-xs text-slate-400">{description}</p> : null}
