@@ -103,3 +103,11 @@ Las nuevas pruebas automatizadas `tests/history-filters.test.mjs` protegen la b�
 6. Repetir pruebas en escritorio; confirmar que el diseño del modal se mantiene legible y accesible.
 
 Pruebas: `tests/form-ux.test.mjs` garantiza que los seis formularios utilicen los componentes comunes y que las notas existentes se desplieguen en edición. **Los tests de código y compilación no sustituyen la prueba visual real en iPhone.**
+
+## Corrección de posición de formularios en iPhone — 26/11/2026
+
+- Tras validar la vista previa, se observó que **Nueva categoría**, **Nuevo crédito** y **Nuevo movimiento** seguían abriéndose desde la parte inferior, mientras **Nuevo plan de ahorro** ya estaba centrado.
+- Los cuatro formularios principales (también en modo edición) ahora utilizan la variante `centered` del componente compartido `Modal` para mantener una presentación uniforme.
+- El modal conserva su altura máxima ligada a `100dvh`, las áreas seguras del iPhone, el área interna de desplazamiento y el footer de guardado de movimientos. El teclado puede modificar el área visible, por lo que debe verificarse en Safari iPhone.
+- Prueba automatizada añadida a `tests/form-ux.test.mjs` para comprobar que los cuatro formularios continúan usando la variante centrada.
+- **No se cambian las operaciones financieras ni Firestore y no se despliega el canal live.**
