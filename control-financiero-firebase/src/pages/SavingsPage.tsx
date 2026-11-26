@@ -256,29 +256,29 @@ export function SavingsPage() {
       >
         {selectedPlan ? (
           <div className="space-y-5">
-            <Card className="space-y-4 p-5">
-              <div className="grid gap-4 sm:grid-cols-2">
+            <Card className="space-y-4 p-3.5 sm:p-5">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-sm text-slate-400">Monto mensual</p>
-                  <p className="mt-2 text-lg font-bold text-ink">
+                  <p className="mt-1 break-words text-sm font-bold text-ink sm:text-lg">
                     {formatCurrency(selectedPlan.monthlyTarget, profile?.currency ?? 'CLP')}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-400">Total ahorrado</p>
-                  <p className="mt-2 text-lg font-bold text-accent">
+                  <p className="mt-1 break-words text-sm font-bold text-accent sm:text-lg">
                     {formatCurrency(selectedPlan.savedAmount, profile?.currency ?? 'CLP')}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-400">Ahorrado este mes</p>
-                  <p className="mt-2 text-lg font-bold text-ink">
+                  <p className="mt-1 break-words text-sm font-bold text-ink sm:text-lg">
                     {formatCurrency(currentMonthSaved, profile?.currency ?? 'CLP')}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-400">Ultimo ingreso</p>
-                  <p className="mt-2 text-lg font-bold text-ink">{lastEntry ? formatDate(lastEntry.entryDate) : 'Sin ingresos'}</p>
+                  <p className="mt-1 break-words text-sm font-bold text-ink sm:text-lg">{lastEntry ? formatDate(lastEntry.entryDate) : 'Sin ingresos'}</p>
                 </div>
               </div>
 
@@ -313,7 +313,7 @@ export function SavingsPage() {
             {entriesLoading ? (
               <Loader label="Cargando ingresos de ahorro..." />
             ) : entries.length > 0 ? (
-              <div className="space-y-3">
+              <div className="divide-y divide-white/10 rounded-2xl border border-white/10 bg-white/[0.035] px-3 py-1">
                 {entries.map((entry) => (
                   <SavingsEntryListItem
                     key={entry.id}
