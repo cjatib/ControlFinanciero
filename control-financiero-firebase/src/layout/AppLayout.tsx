@@ -113,6 +113,7 @@ export function AppLayout() {
   const [moreOpen, setMoreOpen] = useState(false);
   const isSecondary = SECONDARY_NAV_ITEMS.some((item) => location.pathname.startsWith(item.to));
   const onTransactionsScreen = location.pathname === '/transactions';
+  const onSavingsScreen = location.pathname === '/savings';
 
   useEffect(() => {
     setMoreOpen(false);
@@ -139,7 +140,7 @@ export function AppLayout() {
         </main>
       </div>
 
-      {!onTransactionsScreen && !isSecondary && !moreOpen ? (
+      {!onTransactionsScreen && !onSavingsScreen && !isSecondary && !moreOpen ? (
         <Link
           to="/transactions?create=1"
           className="fixed right-4 z-30 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-slate-950 shadow-[0_10px_24px_rgba(183,198,250,0.26)] transition hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/50 sm:right-8 sm:h-14 sm:w-14"
