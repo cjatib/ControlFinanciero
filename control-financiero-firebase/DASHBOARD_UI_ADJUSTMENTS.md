@@ -78,3 +78,28 @@ Las nuevas pruebas automatizadas `tests/history-filters.test.mjs` protegen la b�
 3. Créditos: comprobar saldos, estatus Activo/Vencido/Pagado, cuotas y fecha del próximo vencimiento con casos existentes; abrir detalles, formulario de abono y cancelación de eliminación.
 4. Comprobar la navegación inferior y el desplazamiento hasta el último registro en Ahorro y Créditos, sin superposición del botón flotante.
 5. Revalidar Historial y Categorías en el mismo despliegue, así como Dashboard y Movimientos. No fusionar ni desplegar `live` sin autorización expresa.
+
+## Formularios de creación/edición — 26/11/2026
+
+**Objetivo:** adoptar una única experiencia para los formularios de nuevas transacciones, categorías, créditos, planes de ahorro, aportes y cuotas. Corresponde a la revisión visual del usuario en iPhone.
+
+- El modal compartido tiene un encabezado compacto, botón de cierre **X** accesible, áreas de desplazamiento y padding seguro para la barra inferior del iPhone; el footer externo de transacciones se mantiene fijo y se asocia al formulario con `form=transaction-editor`.
+- Todos los formularios usan espaciado más denso y controles táctiles de 44 px, sin fuentes inferiores a 16 px en campos nativos para evitar el zoom involuntario de iOS.
+- Se centralizaron los botones de acción en `FormActions`: primaria **Guardar/Crear/Registrar**, secundaria **Cancelar**, indicador **Guardando…** y bloqueo mientras se procesa la petición.
+- El tipo **Gasto/Ingreso** se presenta como selector segmentado en transacciones y categorías. Las opciones de color e icono de Categorías se expanden dentro del scroll del modal en móvil en vez de quedar cortadas.
+- La descripción o nota opcional aparece como una sección desplegable. Al editar un documento que ya contiene descripción se muestra abierta. Colapsar **nunca borra el texto guardado en el estado del formulario**.
+- Crédito: monto y cantidad de cuotas comparten una fila compacta; la fecha del primer vencimiento mantiene el selector nativo. Las reglas de validación de montos, cuotas y fechas no cambian.
+- Los registros de ahorro/cuotas conservan las comprobaciones financieras y muestran un resumen de crédito más compacto.
+- `Plan`: se compactó únicamente el control **+ Agregar grupo**. No se altera la composición del plan, los porcentajes ni la validación del 100 %.
+- **Ninguna modificación de Firebase Auth, Firestore, reglas, servicios ni operaciones de escritura.** La versión publicada en `live` permanece intacta hasta nueva autorización.
+
+### Aceptación manual de los formularios
+
+1. iPhone: entrar a **Movimientos → Nuevo**, elegir Gasto e Ingreso, registrar monto/categoría/fecha; abrir nota opcional, cerrar sin guardar y editar uno existente. Comprobar que los valores no desaparecen al abrir/cerrar la nota.
+2. **Categorías → Nueva**: comprobar cambio Gasto/Ingreso, color, icono, búsqueda dentro del selector y desplazamiento completo hasta Guardar. Cerrar sin grabar.
+3. **Ahorro → Nuevo plan** y **Registrar ahorro** desde un detalle: comprobar campos, notas plegables, botones y conservación de contenido al editar.
+4. **Créditos → Nuevo** y **Registrar cuota**: comprobar campos numéricos en dos columnas, calendario, límites de monto y validación. Cancelar antes de escribir datos reales.
+5. Verificar que el teclado iOS no tape el campo activo, que Guardar/Cancelar sea alcanzable, y que cerrar con X o Escape restaure el foco sin saltos en Chrome.
+6. Repetir pruebas en escritorio; confirmar que el diseño del modal se mantiene legible y accesible.
+
+Pruebas: `tests/form-ux.test.mjs` garantiza que los seis formularios utilicen los componentes comunes y que las notas existentes se desplieguen en edición. **Los tests de código y compilación no sustituyen la prueba visual real en iPhone.**
