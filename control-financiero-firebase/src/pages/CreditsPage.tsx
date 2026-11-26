@@ -282,28 +282,28 @@ export function CreditsPage() {
       >
         {selectedCredit ? (
           <div className="space-y-5">
-            <Card className="grid gap-4 p-5 sm:grid-cols-2">
+            <Card className="grid grid-cols-2 gap-3 p-3.5 sm:p-5">
               <div>
                 <p className="text-sm text-slate-400">Proximo vencimiento</p>
-                <p className="mt-2 text-lg font-bold text-ink">
+                <p className="mt-1 break-words text-sm font-bold text-ink sm:text-lg">
                   {selectedCreditNextDueDate ? formatDate(selectedCreditNextDueDate) : 'Credito saldado'}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-slate-400">Cuotas registradas</p>
-                <p className="mt-2 text-lg font-bold text-ink">
+                <p className="mt-1 break-words text-sm font-bold text-ink sm:text-lg">
                   {selectedCredit.paidInstallments} de {selectedCredit.totalInstallments}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-slate-400">Monto total</p>
-                <p className="mt-2 text-lg font-bold text-ink">
+                <p className="mt-1 break-words text-sm font-bold text-ink sm:text-lg">
                   {formatCurrency(selectedCredit.totalAmount, profile?.currency ?? 'CLP')}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-slate-400">Primer vencimiento</p>
-                <p className="mt-2 text-lg font-bold text-ink">{formatDate(selectedCredit.firstDueDate)}</p>
+                <p className="mt-1 break-words text-sm font-bold text-ink sm:text-lg">{formatDate(selectedCredit.firstDueDate)}</p>
               </div>
             </Card>
 
@@ -328,7 +328,7 @@ export function CreditsPage() {
             {installmentsLoading ? (
               <Loader label="Cargando cuotas..." />
             ) : installments.length > 0 ? (
-              <div className="space-y-3">
+              <div className="divide-y divide-white/10 rounded-2xl border border-white/10 bg-white/[0.035] px-3 py-1">
                 {installments.map((installment) => (
                   <CreditInstallmentListItem
                     key={installment.id}
