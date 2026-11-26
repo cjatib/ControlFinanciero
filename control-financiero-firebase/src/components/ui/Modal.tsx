@@ -47,8 +47,8 @@ export function Modal({
           'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href]',
         );
         if (!elements?.length) return;
-        const first = elements[0];
-        const last = elements[elements.length - 1];
+        const first = elements[0]!;
+        const last = elements[elements.length - 1]!;
         if (event.shiftKey && (document.activeElement === first || document.activeElement === dialogRef.current)) {
           event.preventDefault();
           last.focus();
