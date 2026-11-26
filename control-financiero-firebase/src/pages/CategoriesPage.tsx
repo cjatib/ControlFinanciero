@@ -127,6 +127,7 @@ export function CategoriesPage() {
         open={modalOpen}
         title={selectedCategory ? 'Editar categoría' : 'Nueva categoría'}
         description="Asigna un nombre y personaliza su apariencia."
+        centered
         onClose={() => {
           setModalOpen(false);
           setSelectedCategory(null);
