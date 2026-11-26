@@ -125,7 +125,7 @@ export function CreditForm({ initialValue, onSubmit, onCancel }: CreditFormProps
       <div className="grid grid-cols-2 gap-3">
         <Input
           id="credit-total-amount"
-          label="Monto total (CLP)"
+          label="Monto (CLP)"
           className="font-semibold tabular-nums"
           type="number"
           inputMode="numeric"
@@ -139,7 +139,7 @@ export function CreditForm({ initialValue, onSubmit, onCancel }: CreditFormProps
   
         <Input
           id="credit-installments"
-          label="Número de cuotas"
+          label="Cuotas"
           type="number"
           inputMode="numeric"
           min="1"
