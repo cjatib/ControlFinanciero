@@ -265,6 +265,7 @@ export function CreditsPage() {
         open={creditModalOpen}
         title={editingCredit ? 'Editar credito' : 'Nuevo credito'}
         description="Indica el monto, las cuotas y el primer vencimiento."
+        centered
         onClose={closeCreditModal}
       >
         <CreditForm initialValue={editingCredit} onSubmit={handleSaveCredit} onCancel={closeCreditModal} />
