@@ -264,7 +264,7 @@ export function CreditsPage() {
       <Modal
         open={creditModalOpen}
         title={editingCredit ? 'Editar credito' : 'Nuevo credito'}
-        description="Define el monto total, el numero de cuotas y la fecha del primer vencimiento."
+        description="Indica el monto, las cuotas y el primer vencimiento."
         onClose={closeCreditModal}
       >
         <CreditForm initialValue={editingCredit} onSubmit={handleSaveCredit} onCancel={closeCreditModal} />
@@ -366,7 +366,7 @@ export function CreditsPage() {
       <Modal
         open={installmentModalOpen && Boolean(selectedCredit)}
         title={selectedInstallment ? 'Editar cuota' : 'Registrar cuota'}
-        description="Guarda el monto abonado y la fecha en que ingresaste la cuota."
+        description="Registra el monto y la fecha del pago."
         onClose={closeInstallmentModal}
       >
         {selectedCredit ? (
