@@ -147,8 +147,8 @@ export function HistoryPage() {
 
       <Modal
         open={modalOpen}
-        title="Editar transaccion"
-        description="Actualiza el monto, categoria o fecha del movimiento seleccionado."
+        title="Editar movimiento"
+        description="Corrige el monto, la categoría o la fecha."
         onClose={closeModal}
         footer={
           <div className="flex flex-col gap-2">
