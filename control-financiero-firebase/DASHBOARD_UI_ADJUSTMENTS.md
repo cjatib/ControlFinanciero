@@ -60,3 +60,21 @@ Los nuevos tests en `tests/dashboard-savings.test.mjs` comprueban que el objetiv
 5. Repetir en Chrome escritorio, comprobando que los formularios y filtros no rompen la distribución en ancho grande.
 
 Las nuevas pruebas automatizadas `tests/history-filters.test.mjs` protegen la búsqueda, mes, categoría y los totales derivados de los resultados filtrados.
+
+## Ahorro y Créditos — 25/11/2026
+
+- Ahorro: se sustituyeron las tres tarjetas individuales del resumen por **una sola tarjeta compacta**, con meta mensual total, saldo acumulado real y cantidad de planes. No se presentan esos montos como si fueran equivalentes: una meta mensual no es un ahorro acumulado.
+- Ahorro: cabecera breve con **Nuevo plan**; los planes aparecen en una lista única con nombre, número de aportes, meta mensual, saldo real y acceso **Ver aportes y registrar ahorro**. Las acciones de edición y borrado están bajo **···** con confirmación original.
+- Créditos: resumen consolidado de saldo pendiente y total abonado, con recuentos de créditos activos y cuotas. Se mantiene la lógica existente de cálculo de saldos, estados, fechas y cuotas.
+- Créditos: cabecera breve con **Nuevo**, listado continuo con estado, cuotas registradas, montos y progreso horizontal. Acceso **Ver cuotas y registrar pago** por crédito. Las opciones **···** conservan edición y eliminación.
+- En las ventanas de detalle de ambas secciones, métricas compactas de dos columnas y aportes/cuotas como filas con menú contextual sin botones grandes permanentes.
+- En Ahorro se oculta el botón flotante global porque el mismo alta está disponible en el encabezado. En Créditos ya estaba oculto por ser una sección secundaria.
+- No cambian Firebase Auth, Firestore, reglas, cálculos financieros, permisos, funciones de creación/edición/eliminación, ni el frontend publicado en `live`.
+
+### Pruebas manuales antes de integrar el PR #2
+
+1. Ahorro en iPhone: comprobar resumen, metas acumuladas y nombre largo de plan; abrir detalle y registrar o editar aportes solo con movimientos controlados, o abrir y cancelar formularios sin modificar datos.
+2. Confirmar que el botón **Nuevo plan** funciona, que la opción **···** muestra Editar y Eliminar, y que Eliminar sigue solicitando confirmación.
+3. Créditos: comprobar saldos, estatus Activo/Vencido/Pagado, cuotas y fecha del próximo vencimiento con casos existentes; abrir detalles, formulario de abono y cancelación de eliminación.
+4. Comprobar la navegación inferior y el desplazamiento hasta el último registro en Ahorro y Créditos, sin superposición del botón flotante.
+5. Revalidar Historial y Categorías en el mismo despliegue, así como Dashboard y Movimientos. No fusionar ni desplegar `live` sin autorización expresa.
