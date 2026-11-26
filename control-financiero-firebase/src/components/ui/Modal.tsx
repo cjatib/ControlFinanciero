@@ -39,6 +39,8 @@ export function Modal({
       if (dialogs[dialogs.length - 1] !== dialogRef.current) return;
 
       if (event.key === 'Escape') {
+        // If a category picker is expanded, let its own Escape handler close it first.
+        if (dialogRef.current?.querySelector('[data-combobox-expanded="true"]')) return;
         event.preventDefault();
         onClose();
       }
