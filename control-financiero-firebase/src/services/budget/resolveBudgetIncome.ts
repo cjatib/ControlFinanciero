@@ -5,6 +5,7 @@ import type { Transaction } from '@/types/transaction';
 
 export type BudgetIncomeSource =
   | 'monthly_salary'
+  | 'historical_salary'
   | 'previous_salary'
   | 'monthly_snapshot'
   | 'inherited_plan'
@@ -62,7 +63,8 @@ function salaryTotals(transactions: Transaction[], categories: Category[]): Map<
 }
 
 /**
- * A historical month retains its previous planned base; we never rewrite
+ * A historical month with salary uses that month's own recorded salary;
+ * otherwise it retains its saved or inherited base. We never rewrite
  * historical snapshots. For the current and future months, an actual recorded
  * salary takes precedence over a manually saved snapshot. With no salary for
  * that month, an explicit monthly snapshot wins, otherwise the last known
@@ -78,6 +80,19 @@ export function resolveBudgetIncome({
     return { amount: null, source: 'missing', sourceMonth: null, provisional: true, salaryMovements: 0 };
   }
 
+  // A month's own salary remains its source after the calendar rolls forward.
+  // This keeps old inherited budget figures consistent without changing Firestore.
+  const salaryByMonth = salaryTotals(transactions, categories);
+  const monthlySalary = salaryByMonth.get(month);
+  if (monthlySalary && monthlySalary.amount > 0) {
+    return {
+      amount: monthlySalary.amount,
+      source: month < currentMonth ? 'historical_salary' : 'monthly_salary',
+      sourceMonth: month,
+      provisional: false, salaryMovements: monthlySalary.count,
+    };
+  }
+
   if (month < currentMonth) {
     return budget
       ? {
@@ -85,15 +100,6 @@ export function resolveBudgetIncome({
           provisional: false, salaryMovements: 0,
         }
       : { amount: null, source: 'missing', sourceMonth: null, provisional: false, salaryMovements: 0 };
-  }
-
-  const salaryByMonth = salaryTotals(transactions, categories);
-  const currentSalary = salaryByMonth.get(month);
-  if (currentSalary && currentSalary.amount > 0) {
-    return {
-      amount: currentSalary.amount, source: 'monthly_salary', sourceMonth: month,
-      provisional: false, salaryMovements: currentSalary.count,
-    };
   }
 
   if (budget?.month === month) {
