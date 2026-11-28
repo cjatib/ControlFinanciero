@@ -73,15 +73,26 @@ test('an explicit saved month retains its manual amount until its own salary is 
   assert.equal(saved.incomeAmount, 2230000);
 });
 
-test('past plans retain historical base, even after transactions change', () => {
+test('historical months retain their own salary, without rewriting saved plan snapshots', () => {
+  const saved = budget('2026-10', 1800000);
+  const transactions = [movement('2026-10', 5, 2050000), movement('2026-11', 5, 2300000)];
+  const result = resolveBudgetIncome({
+    ...base, month: '2026-10', budget: saved, transactions,
+  });
+  assert.equal(result.amount, 2050000);
+  assert.equal(result.source, 'historical_salary');
+  assert.equal(result.provisional, false);
+  assert.equal(saved.incomeAmount, 1800000);
+});
+
+test('a historical plan without an own Sueldo movement keeps its saved base', () => {
   const saved = budget('2026-10', 1800000);
   const result = resolveBudgetIncome({
     ...base, month: '2026-10', budget: saved,
-    transactions: [movement('2026-10', 5, 2050000), movement('2026-11', 5, 2300000)],
+    transactions: [movement('2026-11', 5, 2300000)],
   });
   assert.equal(result.amount, 1800000);
   assert.equal(result.source, 'historical_plan');
-  assert.equal(result.provisional, false);
 });
 
 test('old salary transactions remain recognized after category rename/removal', () => {
