@@ -37,10 +37,12 @@ export function BudgetDistributionSummary({
           <h2 className="text-lg font-extrabold text-ink">Distribución de mi sueldo</h2>
           <p className="mt-1 text-xs text-slate-400">Base del plan: {formatCurrency(incomeAmount, currency)}</p>
           <p className={'mt-1 text-[11px] font-semibold ' +
-            (budgetIncome.source === 'monthly_salary' ? 'text-emerald-300' : 'text-amber-200')}>
+            (budgetIncome.source === 'monthly_salary' || budgetIncome.source === 'historical_salary' ? 'text-emerald-300' : 'text-amber-200')}>
             {budgetIncome.source === 'monthly_salary'
               ? 'Sueldo de este mes · actualizado desde Movimientos'
-              : budgetIncome.source === 'previous_salary'
+              : budgetIncome.source === 'historical_salary'
+                ? 'Sueldo registrado de este mes histórico · sin cambios en Firestore'
+                : budgetIncome.source === 'previous_salary'
                 ? 'Provisional · último sueldo registrado (' + budgetIncome.sourceMonth + ')'
                 : budgetIncome.source === 'monthly_snapshot'
                   ? 'Provisional · sueldo configurado para este mes'
@@ -61,8 +63,8 @@ export function BudgetDistributionSummary({
 
       {inherited ? (
         <p className="rounded-xl border border-accent/20 bg-accent/10 px-3 py-2 text-xs text-accent">
-          {budgetIncome.source === 'historical_plan'
-            ? 'Distribución histórica heredada de ' + sourceMonth + '. La base se mantiene fija para proteger el historial.'
+          {budgetIncome.source === 'historical_plan' || budgetIncome.source === 'historical_salary'
+            ? 'Distribución histórica heredada de ' + sourceMonth + '. El sueldo de ese mes se usa si fue registrado, sin modificar el plan guardado.'
             : 'Distribución heredada de ' + sourceMonth + '. Los porcentajes se mantienen; el sueldo se actualiza al registrar «Sueldo» en Movimientos. Para cambiar porcentajes, personaliza este mes.'}
         </p>
       ) : null}
