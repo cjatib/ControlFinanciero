@@ -8,10 +8,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { useMonthlyBudgets } from '@/hooks/useMonthlyBudgets';
 import { useSavingsPlans } from '@/hooks/useSavingsPlans';
+import { useTransactions } from '@/hooks/useTransactions';
 import { formatCurrency } from '@/lib/format';
 import { saveMonthlyBudget } from '@/services/budget/budgetService';
 import { validateMonthlyBudget } from '@/services/budget/budgetMath';
 import { resolveMonthlyBudget } from '@/services/budget/resolveMonthlyBudget';
+import { resolveBudgetIncome } from '@/services/budget/resolveBudgetIncome';
 import { getCurrentMonthValue } from '@/services/summary/summaryService';
 import { BUDGET_COLORS, newBudgetGroup, starterBudgetGroups } from '@/types/budget';
 import type { BudgetGroup, BudgetGroupKind, MonthlyBudgetPayload } from '@/types/budget';
@@ -30,6 +32,7 @@ export function PlanPage() {
   const { budgets, loading: budgetsLoading, error: budgetsError } = useMonthlyBudgets();
   const { categories, loading: categoriesLoading, error: categoriesError } = useCategories();
   const { plans, loading: savingsLoading, error: savingsError } = useSavingsPlans();
+  const { transactions, loading: transactionsLoading, error: transactionsError } = useTransactions();
   const [month, setMonth] = useState(() => {
     const requested = searchParams.get('month');
     return requested && /^\d{4}-(0[1-9]|1[0-2])$/.test(requested) ? requested : getCurrentMonthValue();
@@ -45,18 +48,29 @@ export function PlanPage() {
   const existing = budgets.find((item) => item.month === month);
   const resolved = resolveMonthlyBudget(budgets, month);
   const source = resolved.budget;
+  const budgetIncome = resolveBudgetIncome({ month, budget: source, transactions, categories });
+  const hasRegisteredSalary = budgetIncome.source === 'monthly_salary';
+
 
   useEffect(() => {
     const nextGroups = source
       ? source.groups.map((g) => ({ ...g, categoryIds: [...g.categoryIds] }))
       : starterBudgetGroups();
-    setIncome(source ? String(source.incomeAmount) : '');
+    setIncome(budgetIncome.amount !== null ? String(budgetIncome.amount) : '');
     setGroups(nextGroups);
     setPercentageInputs(Object.fromEntries(nextGroups.map((g) => [g.id, String(g.percentage)])));
     setSaved(false);
     setSaveError(null);
   }, [month, source]);
 
+  // Update salary automatically when Movimientos changes, without discarding
+  // any unsaved group edits. A provisional/manual amount remains editable.
+  useEffect(() => {
+    if ((budgetIncome.source === 'monthly_salary' || budgetIncome.source === 'previous_salary') &&
+        budgetIncome.amount !== null) {
+      setIncome(String(budgetIncome.amount));
+    }
+  }, [month, budgetIncome.amount, budgetIncome.source]);
 
   const total = groups.reduce((sum, group) => sum + Number(group.percentage || 0), 0);
   const amount = Number(income);
@@ -136,7 +150,7 @@ export function PlanPage() {
     }
   }
 
-  if (budgetsLoading || categoriesLoading || savingsLoading) {
+  if (budgetsLoading || categoriesLoading || savingsLoading || transactionsLoading) {
     return <Loader label="Cargando tu planificación..." />;
   }
 
@@ -147,11 +161,12 @@ export function PlanPage() {
         title="Distribuye tu sueldo"
         description="Los meses siguientes heredan tu plan, y los meses anteriores quedan cerrados para preservar su historial."
       />
-      {budgetsError || categoriesError || savingsError ? (
+      {budgetsError || categoriesError || savingsError || transactionsError ? (
         <Card className="space-y-2 p-4 text-sm text-rose-200">
           {budgetsError ? <p>{budgetsError} Revisa las reglas de Firestore para monthlyBudgets.</p> : null}
           {categoriesError ? <p>{categoriesError}</p> : null}
           {savingsError ? <p>{savingsError}</p> : null}
+          {transactionsError ? <p>No se pudieron consultar los movimientos: {transactionsError}</p> : null}
         </Card>
       ) : null}
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -166,10 +181,35 @@ export function PlanPage() {
           <fieldset disabled={isHistorical} className="space-y-3">
             <label htmlFor="budget-income" className="block text-sm font-semibold text-slate-200">Sueldo base del mes (CLP)</label>
             <input id="budget-income" type="number" inputMode="numeric" min={1} step={1}
-              placeholder="Ejemplo: 1000000" value={income} onChange={(e) => { setIncome(e.target.value); setSaved(false); }}
-              className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-xl font-bold text-ink placeholder:text-slate-500 disabled:opacity-60" required />
+              placeholder="Ejemplo: 1000000" value={income} readOnly={hasRegisteredSalary}
+              onChange={(e) => { setIncome(e.target.value); setSaved(false); }}
+              className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-xl font-bold text-ink placeholder:text-slate-500 read-only:bg-emerald-300/[0.07] read-only:border-emerald-300/25 disabled:opacity-60" required />
+            {hasRegisteredSalary ? (
+              <p className="text-xs font-semibold text-emerald-300">
+                Sueldo registrado en Movimientos para {month}. El monto se recalcula automáticamente; no necesitas guardarlo nuevamente.
+              </p>
+            ) : budgetIncome.source === 'previous_salary' ? (
+              <p className="text-xs leading-5 text-amber-200">
+                Presupuesto provisional: sin sueldo registrado para {month}. Se usa el último sueldo de {budgetIncome.sourceMonth}.
+                Puedes ingresar una base manual si necesitas hacer una proyección.
+              </p>
+            ) : budgetIncome.source === 'monthly_snapshot' ? (
+              <p className="text-xs leading-5 text-amber-200">
+                Presupuesto provisional con el monto guardado para este mes. Se actualizará automáticamente al registrar tu sueldo.
+              </p>
+            ) : budgetIncome.source === 'inherited_plan' ? (
+              <p className="text-xs leading-5 text-amber-200">
+                Presupuesto provisional: todavía no hay sueldo registrado. Se usa la base del plan de {budgetIncome.sourceMonth}.
+              </p>
+            ) : budgetIncome.source === 'historical_salary' ? (
+              <p className="text-xs text-emerald-300">Sueldo que registraste para este mes histórico; el presupuesto guardado no se modifica.</p>
+            ) : budgetIncome.source === 'historical_plan' ? (
+              <p className="text-xs text-slate-400">Sin sueldo registrado para este mes histórico: se conserva la base guardada o heredada.</p>
+            ) : (
+              <p className="text-xs text-slate-400">Registra un movimiento de ingreso en la categoría «Sueldo» o ingresa una base manual para crear tu plan.</p>
+            )}
           </fieldset>
-          <p className="text-xs leading-5 text-slate-400">El sueldo base sirve para calcular tus límites. No crea un ingreso ni modifica las transacciones existentes.</p>
+          <p className="text-xs leading-5 text-slate-400">La distribución usa este sueldo para calcular límites. El plan no registra ingresos ni modifica tus movimientos; solo hereda los porcentajes.</p>
         </Card>
 
         <fieldset disabled={isHistorical} className="min-w-0 space-y-5 disabled:opacity-80">
