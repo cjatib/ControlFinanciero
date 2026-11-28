@@ -14,6 +14,7 @@ import { formatCurrency } from '@/lib/format';
 import { calculateBudgetProgress } from '@/services/budget/budgetMath';
 import { previousMonth } from '@/services/analytics/financialAnalytics';
 import { resolveMonthlyBudget } from '@/services/budget/resolveMonthlyBudget';
+import { resolveBudgetIncome } from '@/services/budget/resolveBudgetIncome';
 import { calculateSummary, filterTransactionsByMonth, getCurrentMonthValue } from '@/services/summary/summaryService';
 import type { BudgetGroup } from '@/types/budget';
 
@@ -56,6 +57,11 @@ export function DashboardPage() {
   const { budgets, loading: budgetLoading, error: budgetError } = useMonthlyBudgets();
   const [month, setMonth] = useState(getCurrentMonthValue());
   const { budget, sourceMonth, inherited } = resolveMonthlyBudget(budgets, month);
+  const budgetIncome = resolveBudgetIncome({ month, budget, transactions, categories });
+  // Recalculate only in memory: never mutate inherited or saved Firestore snapshots.
+  const effectiveBudget = budget && budgetIncome.amount !== null
+    ? { ...budget, incomeAmount: budgetIncome.amount }
+    : budget;
   const groups: BudgetGroup[] = budget?.groups ?? [];
   const { totals: savingsTotals, error: savingsError } = useBudgetSavings(groups, month);
 
@@ -68,7 +74,7 @@ export function DashboardPage() {
   const precedingMonthTransactions = precedingMonth ? filterTransactionsByMonth(transactions, precedingMonth) : [];
   const summary = calculateSummary(monthTransactions);
   const currency = profile?.currency ?? 'CLP';
-  const progress = budget ? calculateBudgetProgress(budget, monthTransactions, savingsTotals) : [];
+  const progress = effectiveBudget ? calculateBudgetProgress(effectiveBudget, monthTransactions, savingsTotals) : [];
   const linkedCategoryIds = new Set(groups.filter((group) => group.kind === 'expense').flatMap((group) => group.categoryIds));
   const unassignedExpenseAmount = monthTransactions
     .filter((tx) => tx.type === 'expense' && !linkedCategoryIds.has(tx.categoryId))
@@ -140,7 +146,8 @@ export function DashboardPage() {
         <>
           <BudgetDistributionSummary
             currency={currency}
-            incomeAmount={budget.incomeAmount}
+            incomeAmount={effectiveBudget?.incomeAmount ?? budget.incomeAmount}
+            budgetIncome={budgetIncome}
             inherited={inherited}
             month={month}
             progress={progress}
