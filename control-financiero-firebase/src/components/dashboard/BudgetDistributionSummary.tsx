@@ -2,11 +2,13 @@ import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
 import { formatCurrency } from '@/lib/format';
 import type { BudgetGroupProgress } from '@/services/budget/budgetMath';
+import type { ResolvedBudgetIncome } from '@/services/budget/resolveBudgetIncome';
 import { summarizeSavingsGoals } from '@/services/dashboard/savingsGoalSummary';
 
 interface BudgetDistributionSummaryProps {
   currency: 'CLP';
   incomeAmount: number;
+  budgetIncome: ResolvedBudgetIncome;
   inherited: boolean;
   month: string;
   progress: BudgetGroupProgress[];
@@ -20,6 +22,7 @@ function percent(value: number): string {
 export function BudgetDistributionSummary({
   currency,
   incomeAmount,
+  budgetIncome,
   inherited,
   month,
   progress,
@@ -33,6 +36,20 @@ export function BudgetDistributionSummary({
         <div>
           <h2 className="text-lg font-extrabold text-ink">Distribución de mi sueldo</h2>
           <p className="mt-1 text-xs text-slate-400">Base del plan: {formatCurrency(incomeAmount, currency)}</p>
+          <p className={'mt-1 text-[11px] font-semibold ' +
+            (budgetIncome.source === 'monthly_salary' ? 'text-emerald-300' : 'text-amber-200')}>
+            {budgetIncome.source === 'monthly_salary'
+              ? 'Sueldo de este mes · actualizado desde Movimientos'
+              : budgetIncome.source === 'previous_salary'
+                ? 'Provisional · último sueldo registrado (' + budgetIncome.sourceMonth + ')'
+                : budgetIncome.source === 'monthly_snapshot'
+                  ? 'Provisional · sueldo configurado para este mes'
+                  : budgetIncome.source === 'inherited_plan'
+                    ? 'Provisional · sueldo heredado del plan ' + budgetIncome.sourceMonth
+                    : budgetIncome.source === 'historical_plan'
+                      ? 'Base histórica del plan · sin recálculo retroactivo'
+                      : 'Sin sueldo registrado'}
+          </p>
         </div>
         <Link
           to={'/plan?month=' + month}
@@ -44,7 +61,7 @@ export function BudgetDistributionSummary({
 
       {inherited ? (
         <p className="rounded-xl border border-accent/20 bg-accent/10 px-3 py-2 text-xs text-accent">
-          Plan heredado de {sourceMonth}. Solo cambiará si guardas una versión para este mes.
+          Distribución heredada de {sourceMonth}. Los porcentajes se mantienen y el sueldo se actualiza automáticamente cuando registras «Sueldo» en Movimientos. Para cambiar los porcentajes, guarda una versión para este mes.
         </p>
       ) : null}
 
