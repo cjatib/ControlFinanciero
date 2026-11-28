@@ -61,7 +61,9 @@ export function BudgetDistributionSummary({
 
       {inherited ? (
         <p className="rounded-xl border border-accent/20 bg-accent/10 px-3 py-2 text-xs text-accent">
-          Distribución heredada de {sourceMonth}. Los porcentajes se mantienen y el sueldo se actualiza automáticamente cuando registras «Sueldo» en Movimientos. Para cambiar los porcentajes, guarda una versión para este mes.
+          {budgetIncome.source === 'historical_plan'
+            ? 'Distribución histórica heredada de ' + sourceMonth + '. La base se mantiene fija para proteger el historial.'
+            : 'Distribución heredada de ' + sourceMonth + '. Los porcentajes se mantienen; el sueldo se actualiza al registrar «Sueldo» en Movimientos. Para cambiar porcentajes, personaliza este mes.'}
         </p>
       ) : null}
 
