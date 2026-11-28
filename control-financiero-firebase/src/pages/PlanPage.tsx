@@ -201,8 +201,10 @@ export function PlanPage() {
               <p className="text-xs leading-5 text-amber-200">
                 Presupuesto provisional: todavía no hay sueldo registrado. Se usa la base del plan de {budgetIncome.sourceMonth}.
               </p>
+            ) : budgetIncome.source === 'historical_salary' ? (
+              <p className="text-xs text-emerald-300">Sueldo que registraste para este mes histórico; el presupuesto guardado no se modifica.</p>
             ) : budgetIncome.source === 'historical_plan' ? (
-              <p className="text-xs text-slate-400">Base histórica protegida: no se recalculan automáticamente los meses anteriores.</p>
+              <p className="text-xs text-slate-400">Sin sueldo registrado para este mes histórico: se conserva la base guardada o heredada.</p>
             ) : (
               <p className="text-xs text-slate-400">Registra un movimiento de ingreso en la categoría «Sueldo» o ingresa una base manual para crear tu plan.</p>
             )}
