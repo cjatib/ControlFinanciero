@@ -103,10 +103,10 @@ export function resolveBudgetIncome({
     };
   }
 
-  const previousSalaryMonth = [...salaryByMonth.keys()]
+  const previousSalaryMonths = [...salaryByMonth.keys()]
     .filter((salaryMonth) => salaryMonth < month)
-    .sort()
-    .at(-1);
+    .sort();
+  const previousSalaryMonth = previousSalaryMonths[previousSalaryMonths.length - 1];
   if (previousSalaryMonth) {
     const previous = salaryByMonth.get(previousSalaryMonth)!;
     return {
