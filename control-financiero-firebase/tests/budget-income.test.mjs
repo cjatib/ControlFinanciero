@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { resolveBudgetIncome } from '../src/services/budget/resolveBudgetIncome.ts';
+import { calculateBudgetProgress } from '../src/services/budget/budgetMath.ts';
 
 const salaryCategory = { id: 'salary-id', name: 'Sueldo', type: 'income' };
 const otherIncomeCategory = { id: 'bonus', name: 'Bonificación', type: 'income' };
@@ -138,4 +139,32 @@ test('does not count zero, unsafe amounts or invalid dates', () => {
     ],
   });
   assert.equal(result.source, 'inherited_plan');
+});
+
+test('the real salary changes assigned amounts while percentages and saved snapshot stay intact', () => {
+  const snapshot = budget('2026-10', 1900000);
+  const result = resolveBudgetIncome({
+    ...base, budget: snapshot, transactions: [movement('2026-11', 5, 2050000)],
+  });
+  const derived = { ...snapshot, incomeAmount: result.amount };
+  const progress = calculateBudgetProgress(derived, [], {});
+  assert.deepEqual(progress.map((item) => item.assigned), [1435000, 410000, 205000]);
+  assert.deepEqual(snapshot.groups.map((group) => group.percentage), [70, 20, 10]);
+  assert.equal(snapshot.incomeAmount, 1900000);
+});
+
+test('salary recorded later in the month updates budget base without saving a new plan', () => {
+  const first = resolveBudgetIncome({
+    ...base, transactions: [movement('2026-10', 5, 1900000)],
+  });
+  const second = resolveBudgetIncome({
+    ...base, transactions: [
+      movement('2026-10', 5, 1900000),
+      movement('2026-11', 22, 2120000),
+    ],
+  });
+  assert.equal(first.amount, 1900000);
+  assert.equal(first.provisional, true);
+  assert.equal(second.amount, 2120000);
+  assert.equal(second.provisional, false);
 });
